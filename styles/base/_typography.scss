@@ -1,0 +1,68 @@
+.h1 {
+  font-size: 1.5rem; //24px
+  letter-spacing: -0.333px;
+
+  @screen sm {
+    font-size: 1.125rem; //18px
+  }
+}
+
+.h2 {
+  font-size: 1.25rem; //20px
+  letter-spacing: -0.25px;
+
+  @screen sm {
+    font-size: 0.9375rem;
+  }
+}
+
+.h3 {
+  font-size: 1.125rem; //18px
+  letter-spacing: -0.25px;
+
+  @screen sm {
+    font-size: 0.8125rem;
+  }
+}
+
+.h4 {
+  font-size: 0.875rem; //14px
+  letter-spacing: -0.2px;
+
+  @screen sm {
+    font-size: 0.8125rem;
+  }
+}
+
+.h1,
+.h2,
+.h3,
+.h4 {
+  font-weight: 700;
+}
+
+.body1 {
+  font-size: 1rem; //16px
+
+  @screen mdsm {
+    font-size: 0.8125rem; //13px
+  }
+}
+
+.body2 {
+  font-size: 0.9375rem; //15px
+
+  @screen sm {
+    font-size: 0.8125rem; //13px
+  }
+}
+
+.body1,
+.body2 {
+  font-weight: 400;
+}
+
+.body3 {
+  font-size: 0.8125rem; //13px
+  font-weight: 600;
+}

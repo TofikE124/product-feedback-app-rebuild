@@ -1,0 +1,6 @@
+*,
+*::before,
+*::after {
+  @apply transition-colors;
+  @apply duration-200;
+}

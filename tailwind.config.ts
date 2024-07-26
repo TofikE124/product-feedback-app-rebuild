@@ -7,11 +7,34 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      sm: {
+        max: "48rem",
+      },
+      md: {
+        min: "48rem",
+        max: "60rem",
+      },
+      mdsm: {
+        max: "60rem",
+      },
+      lgmd: { min: "48rem" },
+      lg: {
+        min: "60rem",
+      },
+    },
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      colors: {
+        "electric-violet": "#AD1FEA",
+        "dark-sky-blue": "#4661E6",
+        "navy-blue": "#3A4374",
+        "steel-blue": "#647196",
+        "soft-white": "#F2F4FF",
+        "cloud-white": "#F7F8FD",
+        "salmon-pink": "#F49F85",
+        "turquoise-blue": "#62BCFA",
+        white: "#FFFFFF",
+        crimson: "#D73737",
       },
     },
   },
