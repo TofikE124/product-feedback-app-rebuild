@@ -10,13 +10,19 @@ import { twMerge } from "tailwind-merge";
 
 const dropdownToggleStyles = cva(
   [
-    "w-fit",
+    "w-full",
     "px-4",
     "lgmd:py-[26px]",
     "sm:py-[16px]",
     "rounded-[10px]",
     "cursor-pointer",
     "select-none",
+    // "transition-[outline-color]",
+    // "duration-200",
+    // "outline",
+    // "outline-1",
+    // "outline-electric-violet/0",
+    // "hover:outline-electric-violet",
   ],
   {
     variants: {
@@ -96,7 +102,7 @@ const DropdownToggle = ({
       onClick={onClick}
       className={twMerge(
         dropdownToggleStyles({ color }),
-        `${dropdownToggleLabel ? "" : "min-w-[255px]"}`
+        `${dropdownToggleLabel ? "" : "min-w-[255px]"} `
       )}
     >
       <div

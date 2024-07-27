@@ -15,17 +15,14 @@ import { useState } from "react";
 
 export default function Home() {
   return (
-    <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto h-full flex mdsm:flex-col lgmd:gap-8 lgmd:py-[94px]">
+    <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto h-screen flex mdsm:flex-col lgmd:gap-8 lg:py-[94px] md:pt-[94px] md:pb-[40px] sm:pb-[50px] ">
       <div className="grid grid-rows-[max-content,max-content] md:grid-cols-3 md:gap-[10px] lg:gap-6">
         <SuggestionsControls></SuggestionsControls>
       </div>
-      <div className="flex flex-col gap-6 w-full">
+      <div className="flex flex-col gap-6 w-full h-full">
         <SuggestionsToolbar></SuggestionsToolbar>
-        <div className="flex flex-col lg:gap-5 mdsm:gap-4 sm:px-6">
-          <SuggestionSummary></SuggestionSummary>
-          <SuggestionSummary></SuggestionSummary>
-          <SuggestionSummary></SuggestionSummary>
-          <SuggestionSummary></SuggestionSummary>
+        <div className="sm:px-6 h-full">
+          <SuggestionsEmpty></SuggestionsEmpty>
         </div>
       </div>
     </main>
@@ -34,7 +31,7 @@ export default function Home() {
 
 const SuggestionsEmpty = () => {
   return (
-    <div className="w-full h-full bg-white rounded-[10px] grid place-items-center">
+    <div className="w-full h-full bg-white rounded-[10px] lg:py-[110px] sm:py-[76px]  grid place-items-center">
       <div className="max-w-[400px] text-center flex flex-col items-center">
         <Image
           className="mb-[50px]"
@@ -46,7 +43,9 @@ const SuggestionsEmpty = () => {
           Got a suggestion? Found a bug that needs to be squashed? We love
           hearing about new ideas to improve our app.
         </p>
-        <Button className="mt-12 w-fit">+ Add Feedback</Button>
+        <Link href="/new-feedback" className="block mt-6">
+          <Button className="w-fit">+ Add Feedback</Button>
+        </Link>
       </div>
     </div>
   );
@@ -66,13 +65,15 @@ const SuggestionsToolbar = () => {
         defaultOption="Most Upvotes"
         dropdownToggleLabel="Sort By"
       ></Dropdown>
-      <Button className="ml-auto">+ Add Feedback</Button>
+      <Link href="/new-feedback" className="block ml-auto">
+        <Button>+ Add Feedback</Button>
+      </Link>
     </div>
   );
 };
 
 const SuggestionsControls = () => {
-  const [isOpened, setIsOpened] = useState(true);
+  const [isOpened, setIsOpened] = useState(false);
 
   return (
     <>
@@ -145,7 +146,7 @@ const SuggestionsMenu = ({ isOpened, onClose }: SuggestionsMenuProps) => {
       <div
         onClick={onClose}
         className={`fixed inset-0 bg-black/50 transition-opacity duration-300 lgmd:hidden ${
-          isOpened ? "opacity-100" : "opacity-0"
+          isOpened ? "opacity-100" : "opacity-0 hidden"
         } z-10`}
       ></div>
     </>

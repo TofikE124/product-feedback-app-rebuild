@@ -4,19 +4,24 @@ import React from "react";
 
 interface TextfieldProps {
   errorMessage?: string;
+  textarea?: boolean;
 }
 
-const TextField = ({ errorMessage }: TextfieldProps) => {
+const TextField = ({ errorMessage, textarea }: TextfieldProps) => {
   return (
     <div className="flex flex-col gap-1">
       <div
-        className={`bg-cloud-white outline outline-1 transition-[outline-color] duration-200 rounded-[5px] py-3 px-6 w-[255px] ${
+        className={`bg-cloud-white outline outline-1 transition-[outline-color] duration-200 rounded-[5px] py-3 px-6 ${
           errorMessage
             ? "outline-crimson"
             : " outline-cloud-white hover:outline-dark-sky-blue"
         }`}
       >
-        <input className="bg-transparent outline-none body2 text-navy-blue"></input>
+        {textarea ? (
+          <textarea className="w-full resize-none bg-transparent outline-none body2 text-navy-blue"></textarea>
+        ) : (
+          <input className="bg-transparent outline-none body2 text-navy-blue"></input>
+        )}
       </div>
       <AnimatePresence>
         {errorMessage ? (
