@@ -12,7 +12,8 @@ const dropdownToggleStyles = cva(
   [
     "w-fit",
     "px-4",
-    "py-[26px]",
+    "lgmd:py-[26px]",
+    "sm:py-[16px]",
     "rounded-[10px]",
     "cursor-pointer",
     "select-none",
@@ -105,7 +106,7 @@ const DropdownToggle = ({
       >
         <h4 className="h4 text-inherit">
           {dropdownToggleLabel ? (
-            <span className="font-normal">{dropdownToggleLabel}</span>
+            <span className="font-normal">{dropdownToggleLabel} : </span>
           ) : defaultMessage && !selectedOption ? (
             <span className="font-normal">{defaultMessage}</span>
           ) : null}
