@@ -9,19 +9,19 @@ import Dropdown from "@/components/Dropdown";
 import UpVoteButton from "@/components/UpVote";
 
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
 import { useLoadFeedbacks as useGetFeedbacks } from "@/hooks/useGetFeedbacks";
 import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
 import { useRemoveUpvote } from "@/hooks/useRemoveUpvote";
 import { useUpvote } from "@/hooks/useUpvote";
 import { FeedbackWithUpVotesAndComments } from "@/types/Feedback";
 import { UpVote } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { memo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { memo, useEffect, useState } from "react";
 import CommentsIcon from "/public/shared/icon-comments.svg";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
 import IllustrationEmpty from "/public/suggestions/illustration-empty.svg";
-import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
+import { SortingDirection, SortingProperty } from "@/types/Sorting";
 
 export default function Home() {
   return (
@@ -68,15 +68,76 @@ const SuggestionsToolbar = () => {
         className="sm:hidden"
       ></Image>
       <h3 className="h3 text-white sm:hidden ">6 Suggestions</h3>
-      <Dropdown
-        options={["Most Upvotes"]}
-        defaultOption="Most Upvotes"
-        dropdownToggleLabel="Sort By"
-      ></Dropdown>
+      <SortByDropdown></SortByDropdown>
       <Link href="/new-feedback" className="block ml-auto">
         <Button>+ Add Feedback</Button>
       </Link>
     </div>
+  );
+};
+
+interface SortingOption {
+  label: string;
+  value: {
+    property: SortingProperty;
+    direction: SortingDirection;
+  };
+}
+
+const SortByDropdown = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const queryClient = useQueryClient();
+
+  const options: SortingOption[] = [
+    {
+      label: "Most Upvotes",
+      value: {
+        property: SortingProperty.UP_VOTES,
+        direction: SortingDirection.DESC,
+      },
+    },
+    {
+      label: "Least Upvotes",
+      value: {
+        property: SortingProperty.UP_VOTES,
+        direction: SortingDirection.ASC,
+      },
+    },
+    {
+      label: "Most Comments",
+      value: {
+        property: SortingProperty.COMMENTS,
+        direction: SortingDirection.DESC,
+      },
+    },
+    {
+      label: "Least Comments",
+      value: {
+        property: SortingProperty.COMMENTS,
+        direction: SortingDirection.ASC,
+      },
+    },
+  ];
+
+  const handleValueChange = (option: SortingOption) => {
+    const { value } = option;
+
+    const urlSearchParams = new URLSearchParams(searchParams);
+    urlSearchParams.set("sortBy", value.property);
+    urlSearchParams.set("sortDirection", value.direction);
+
+    router.push(`/?${urlSearchParams.toString()}`);
+  };
+
+  return (
+    <Dropdown
+      options={options}
+      defaultOption={options[0]}
+      dropdownToggleLabel="Sort By"
+      onValueChange={handleValueChange}
+    ></Dropdown>
   );
 };
 
@@ -176,13 +237,13 @@ const SuggestionFilter = () => {
 
   const handleLinkClick = (value: string | null) => {
     const newSearchParams = new URLSearchParams(searchParams);
-    if (value) newSearchParams.set("filter", value);
-    else newSearchParams.delete("filter");
+    if (value) newSearchParams.set("category", value);
+    else newSearchParams.delete("category");
 
     router.push(`/?${newSearchParams.toString()}`);
   };
 
-  const currentFilter = searchParams.get("filter");
+  const currentFilter = searchParams.get("category");
 
   return (
     <div className="md:basis-full bg-white p-6 rounded-[10px]">
@@ -243,9 +304,9 @@ const StatusItem = ({ color, count, label }: StatusItemProps) => {
 
 const Feedbacks = () => {
   const { data: upVotes } = useGetUserUpvotes();
-  const { data: feedbacks, isPending } = useGetFeedbacks();
+  const { data: feedbacks, fetchStatus } = useGetFeedbacks();
 
-  if (isPending)
+  if (fetchStatus == "fetching")
     return (
       <div className="flex flex-col gap-5 mb-10">
         <FeedbackSummaryLoading></FeedbackSummaryLoading>
@@ -324,7 +385,7 @@ const FeedbackSummary = memo(
 
 const FeedbackSummaryLoading = () => {
   return (
-    <div className="bg-white rounded-[10px] lgmd:p-8 sm:p-6 w-full ">
+    <div className="bg-white rounded-[10px] lgmd:p-8 sm:p-6 w-full">
       <div className="grid lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
         <div className="lgmd:col-start-1 sm:row-start-2">
           <UpvoteLoading />

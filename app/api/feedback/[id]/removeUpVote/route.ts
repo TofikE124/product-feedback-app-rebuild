@@ -42,7 +42,3 @@ export async function POST(request: NextRequest, { params: { id } }: Props) {
     );
   }
 }
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}

@@ -1,11 +1,17 @@
 import prisma from "@/prisma/client";
 import { feedbackSchema } from "@/schemas/feedbackSchema";
-import { Category, Feedback } from "@prisma/client";
+import { SortingDirection, SortingProperty } from "@/types/Sorting";
+import { delay } from "@/utils/delay";
+import { Category, Feedback, Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+
+  await delay(1000);
+
   const session = await getServerSession();
   if (!session?.user)
     return NextResponse.json(
@@ -23,13 +29,33 @@ export async function GET() {
       { status: 401 }
     );
 
+  let orderBy: Prisma.FeedbackOrderByWithRelationInput = {};
+
+  const sortBy = searchParams.get("sortBy");
+  const sortDirection = searchParams.get("sortDirection") as SortingDirection;
+  const category = searchParams.get("category") as Category;
+
+  if (sortBy && sortDirection) {
+    orderBy =
+      sortBy == SortingProperty.UP_VOTES
+        ? { upVotes: { _count: sortDirection } }
+        : sortBy == SortingProperty.COMMENTS
+        ? { comments: { _count: sortDirection } }
+        : {};
+  }
+
   const feedbaks = await prisma.feedback.findMany({
     include: {
       upVotes: { select: { id: true } },
       comments: { select: { id: true } },
     },
+    orderBy,
+    where: { category: { equals: category ?? undefined } },
   });
-  return NextResponse.json(feedbaks, { status: 200 });
+
+  return NextResponse.json(feedbaks, {
+    status: 200,
+  });
 }
 
 export async function POST(request: NextRequest) {

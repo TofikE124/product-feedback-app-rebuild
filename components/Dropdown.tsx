@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Icon from "./Icon";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -17,12 +17,6 @@ const dropdownToggleStyles = cva(
     "rounded-[10px]",
     "cursor-pointer",
     "select-none",
-    // "transition-[outline-color]",
-    // "duration-200",
-    // "outline",
-    // "outline-1",
-    // "outline-electric-violet/0",
-    // "hover:outline-electric-violet",
   ],
   {
     variants: {
@@ -37,14 +31,19 @@ const dropdownToggleStyles = cva(
   }
 );
 
+interface Option {
+  label: string;
+  value: any;
+}
+
 type dropdownToggleVariantProps = VariantProps<typeof dropdownToggleStyles>;
 
 type DropdownProps = {
-  options: string[];
-  defaultOption?: string;
+  options: Option[];
+  defaultOption?: Option;
   dropdownToggleLabel?: string;
   defaultMessage?: string;
-  onValueChange?: (value: string) => void;
+  onValueChange?: (value: Option) => void;
 } & dropdownToggleVariantProps;
 
 const Dropdown = ({
@@ -57,8 +56,9 @@ const Dropdown = ({
 }: DropdownProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultOption || null);
   const [toggled, setToggled] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
-  const handleOptionClick = (option: string) => {
+  const handleOptionClick = (option: Option) => {
     setSelectedOption(option);
     setToggled(false);
   };
@@ -67,8 +67,20 @@ const Dropdown = ({
     if (selectedOption) onValueChange(selectedOption);
   }, [selectedOption]);
 
+  useEffect(() => {
+    const handleClickOutside = (e: any) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setToggled(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [ref]);
+
   return (
-    <div className="relative">
+    <div className="relative z-10" ref={ref}>
       <DropdownToggle
         dropdownToggleLabel={dropdownToggleLabel}
         defaultMessage={defaultMessage}
@@ -89,7 +101,7 @@ const Dropdown = ({
 
 type DropdownToggleProps = {
   onClick: () => void;
-  selectedOption: string | null;
+  selectedOption: Option | null;
   dropdownToggleLabel?: string;
   defaultMessage?: string;
   toggled: boolean;
@@ -122,7 +134,7 @@ const DropdownToggle = ({
           ) : defaultMessage && !selectedOption ? (
             <span className="font-normal">{defaultMessage}</span>
           ) : null}
-          {selectedOption}
+          {selectedOption?.label}
         </h4>
         <div
           className={`transition-transform duration-200 ${
@@ -138,9 +150,9 @@ const DropdownToggle = ({
 
 interface DropdownMenuProps {
   toggled: boolean;
-  options: string[];
-  selectedOption: string | null;
-  onOptionClick: (option: string) => void;
+  options: Option[];
+  selectedOption: Option | null;
+  onOptionClick: (option: Option) => void;
 }
 
 const DropdownMenu = ({
@@ -157,7 +169,7 @@ const DropdownMenu = ({
           animate={{ opacity: 100, translateY: "0px" }}
           exit={{ opacity: 0, translateY: "-15px" }}
           transition={{ duration: 0.2 }}
-          className="absolute mt-4 w-[255px] overflow-hidden rounded-[10px] bg-white shadow-[0px_10px_40px_-7px_rgba(55,63,104,0.35)]"
+          className="absolute mt-2 w-[255px] overflow-hidden rounded-[10px] bg-white shadow-[0px_10px_40px_-7px_rgba(55,63,104,0.35)]"
         >
           {options.map((option, index) => (
             <div
@@ -165,8 +177,10 @@ const DropdownMenu = ({
               className={`group flex items-center justify-between cursor-pointer px-6 py-3 border-b border-solid border-navy-blue/15 last:border-0`}
               onClick={() => onOptionClick(option)}
             >
-              <p className="body1 group-hover:text-electric-violet">{option}</p>
-              {selectedOption == option ? (
+              <p className="body1 group-hover:text-electric-violet">
+                {option.label}
+              </p>
+              {selectedOption?.label == option.label ? (
                 <Icon icon={CheckIcon} color="#AD1FEA" />
               ) : null}
             </div>
