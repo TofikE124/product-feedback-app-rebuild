@@ -44,6 +44,7 @@ type DropdownProps = {
   defaultOption?: string;
   dropdownToggleLabel?: string;
   defaultMessage?: string;
+  onValueChange?: (value: string) => void;
 } & dropdownToggleVariantProps;
 
 const Dropdown = ({
@@ -52,6 +53,7 @@ const Dropdown = ({
   dropdownToggleLabel,
   color,
   defaultMessage,
+  onValueChange = () => {},
 }: DropdownProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultOption || null);
   const [toggled, setToggled] = useState(false);
@@ -60,6 +62,10 @@ const Dropdown = ({
     setSelectedOption(option);
     setToggled(false);
   };
+
+  useEffect(() => {
+    if (selectedOption) onValueChange(selectedOption);
+  }, [selectedOption]);
 
   return (
     <div className="relative">

@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String  @unique
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? @db.Text
+  access_token             String? @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? @db.Text
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  username      String?         @unique
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  Session       Session[]
+  Account       Account?
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments Comment[] 
+  feedbacks Feedback[] 
+  upVotes UpVote[]
+}
+
+enum Category {
+  UI
+  UX
+  Enhancement
+  Bug
+  Feature
+}
+
+
+model Feedback{
+  id String @id @default(cuid())
+  title String
+  description String
+  category  Category
+
+  user      User        @relation(fields: [userId], references: [id],onDelete: Cascade)   
+  userId    String
+
+  comments Comment[] 
+  upVotes UpVote[]
+}
+
+
+
+model Comment {
+  id        String      @id @default(cuid())
+  content   String
+
+  user      User        @relation(fields: [userId], references: [id],onDelete: Cascade)   
+  userId    String
+
+  parent      Comment?    @relation("CommentToComment", fields: [parentId], references: [id],onDelete: Cascade)
+  parentId    String?
+  replies     Comment[]   @relation("CommentToComment")   
+    feedback    Feedback    @relation(fields: [feedbackId], references: [id],onDelete: Cascade)
+  feedbackId  String
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt   
+}
+
+model UpVote {
+  id          String      @id @default(cuid())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  feedback    Feedback    @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  feedbackId  String
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([userId, feedbackId]) 
+}

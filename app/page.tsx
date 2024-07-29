@@ -4,26 +4,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import Dropdown from "@/components/Dropdown";
 import Button from "@/components/Button";
-import UpVote from "@/components/UpVote";
+import Dropdown from "@/components/Dropdown";
+import UpVoteButton from "@/components/UpVote";
 
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { useLoadFeedbacks as useGetFeedbacks } from "@/hooks/useGetFeedbacks";
+import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
+import { useRemoveUpvote } from "@/hooks/useRemoveUpvote";
+import { useUpvote } from "@/hooks/useUpvote";
+import { FeedbackWithUpVotesAndComments } from "@/types/Feedback";
+import { UpVote } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { memo, useState } from "react";
+import CommentsIcon from "/public/shared/icon-comments.svg";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
 import IllustrationEmpty from "/public/suggestions/illustration-empty.svg";
-import CommentsIcon from "/public/shared/icon-comments.svg";
-import { useState } from "react";
+import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
 
 export default function Home() {
   return (
-    <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto h-screen flex mdsm:flex-col lgmd:gap-8 lg:py-[94px] md:pt-[94px] md:pb-[40px] sm:pb-[50px] ">
-      <div className="grid grid-rows-[max-content,max-content] md:grid-cols-3 md:gap-[10px] lg:gap-6">
+    <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen flex mdsm:flex-col lgmd:gap-8 lg:py-[94px] md:pt-[94px] md:pb-[40px] sm:pb-[50px] ">
+      <div className="grid grid-rows-[max-content,max-content] md:grid-cols-3 md:gap-[10px] lg:gap-6 lg:max-w-[255px]">
         <SuggestionsControls></SuggestionsControls>
       </div>
       <div className="flex flex-col gap-6 w-full h-full">
         <SuggestionsToolbar></SuggestionsToolbar>
-        <div className="sm:px-6 h-full">
-          <SuggestionsEmpty></SuggestionsEmpty>
-        </div>
+        <Feedbacks></Feedbacks>
       </div>
     </main>
   );
@@ -145,8 +153,8 @@ const SuggestionsMenu = ({ isOpened, onClose }: SuggestionsMenuProps) => {
       </div>
       <div
         onClick={onClose}
-        className={`fixed inset-0 bg-black/50 transition-opacity duration-300 lgmd:hidden ${
-          isOpened ? "opacity-100" : "opacity-0 hidden"
+        className={`fixed inset-0 bg-black/50 transition-all duration-300 lgmd:hidden ${
+          isOpened ? "opacity-100 visible" : "opacity-0 invisible"
         } z-10`}
       ></div>
     </>
@@ -233,27 +241,174 @@ const StatusItem = ({ color, count, label }: StatusItemProps) => {
   );
 };
 
-const SuggestionSummary = () => {
+const Feedbacks = () => {
+  const { data: upVotes } = useGetUserUpvotes();
+  const { data: feedbacks, isPending } = useGetFeedbacks();
+
+  if (isPending)
+    return (
+      <div className="flex flex-col gap-5 mb-10">
+        <FeedbackSummaryLoading></FeedbackSummaryLoading>
+        <FeedbackSummaryLoading></FeedbackSummaryLoading>
+        <FeedbackSummaryLoading></FeedbackSummaryLoading>
+      </div>
+    );
+
+  return feedbacks?.length ? (
+    <div className="flex flex-col gap-5 mb-10 sm:px-6">
+      {feedbacks?.map((feedback) => (
+        <FeedbackSummary
+          feedback={feedback}
+          key={feedback.id}
+          myUpVotes={upVotes}
+        ></FeedbackSummary>
+      ))}
+    </div>
+  ) : (
+    <SuggestionsEmpty></SuggestionsEmpty>
+  );
+};
+
+interface FeedbackSummaryProps {
+  feedback: FeedbackWithUpVotesAndComments;
+  myUpVotes: UpVote[];
+}
+
+const FeedbackSummary = memo(
+  ({ feedback, myUpVotes }: FeedbackSummaryProps) => {
+    const { data } = useGetFeedbackId(feedback);
+
+    const isUpvoted = () =>
+      myUpVotes.some((vote) => vote.feedbackId == feedback.id);
+
+    const { mutate: handleUpVote, isPending: isUpVoting } = useUpvote(
+      feedback.id
+    );
+
+    const { mutate: handleRemoveUpvote, isPending: isRemovingUpVoting } =
+      useRemoveUpvote(feedback.id);
+
+    const handleUpvoteClick = () => {
+      if (isUpvoted()) handleRemoveUpvote();
+      else handleUpVote();
+    };
+
+    return (
+      <div className="bg-white rounded-[10px] lgmd:p-8 sm:p-6 w-full">
+        <div className="grid lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
+          <div className="lgmd:col-start-1 sm:row-start-2">
+            <UpVoteButton
+              votes={data.upVotes.length}
+              active={isUpvoted()}
+              onClick={handleUpvoteClick}
+            ></UpVoteButton>
+          </div>
+          <div className="lgmd:col-start-2 flex flex-col">
+            <h3 className="h3 text-navy-blue lgmd:mb-1 sm:mb-2">
+              {data.title}
+            </h3>
+            <p className="body1 text-steel-blue lgmd:mb-3 sm:mb-2">
+              {data.description}
+            </p>
+            <FeedbackType text={data.category}></FeedbackType>
+          </div>
+          <div className="lgmd:col-start-3 sm:row-start-2 flex items-center gap-2 ml-auto self-center">
+            <Image src={CommentsIcon} alt="Comments Icon" />
+            <p className="body1 text-navy-blue font-bold">2</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+const FeedbackSummaryLoading = () => {
   return (
-    <div className="bg-white rounded-[10px] lgmd:p-8 sm:p-6 w-full">
+    <div className="bg-white rounded-[10px] lgmd:p-8 sm:p-6 w-full ">
       <div className="grid lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
         <div className="lgmd:col-start-1 sm:row-start-2">
-          <UpVote votes={112}></UpVote>
+          <UpvoteLoading />
         </div>
         <div className="lgmd:col-start-2 flex flex-col">
-          <h3 className="h3 text-navy-blue lgmd:mb-1 sm:mb-2">
-            Add tags for solutions
-          </h3>
-          <p className="body1 text-steel-blue lgmd:mb-3 sm:mb-2">
-            Easier to search for solutions based on a specific stack.
-          </p>
-          <FeedbackType text="Enhancement"></FeedbackType>
+          <LoadingSkeleton
+            baseColor="#F2F4FE"
+            highlightColor="#F8F9FE"
+            width={200}
+            height={26}
+            containerClassName="h-[26px]"
+          ></LoadingSkeleton>
+          <LoadingSkeleton
+            baseColor="#F2F4FE"
+            highlightColor="#F8F9FE"
+            width={200}
+            height={10}
+            containerClassName="mt-1 h-[10px]"
+          ></LoadingSkeleton>
+          <LoadingSkeleton
+            baseColor="#F2F4FE"
+            highlightColor="#F8F9FE"
+            width={150}
+            height={10}
+            className="h-[10px] mt-2"
+          ></LoadingSkeleton>
+          <LoadingSkeleton
+            baseColor="#F2F4FE"
+            highlightColor="#F8F9FE"
+            width={80}
+            height={30}
+            containerClassName="mt-0 h-[30px]"
+            borderRadius={10}
+          ></LoadingSkeleton>
         </div>
         <div className="lgmd:col-start-3 sm:row-start-2 flex items-center gap-2 ml-auto self-center">
-          <Image src={CommentsIcon} alt="Comments Icon" />
-          <p className="body1 text-navy-blue font-bold">2</p>
+          <CommentsLoading></CommentsLoading>
         </div>
       </div>
     </div>
+  );
+};
+
+const UpvoteLoading = () => {
+  return (
+    <>
+      <LoadingSkeleton
+        baseColor="#F2F4FE"
+        highlightColor="#F8F9FE"
+        width={40}
+        height={53}
+        borderRadius={10}
+        containerClassName="sm:hidden h-[53px]"
+      ></LoadingSkeleton>
+      <LoadingSkeleton
+        baseColor="#F2F4FE"
+        highlightColor="#F8F9FE"
+        width={70}
+        height={32}
+        borderRadius={10}
+        containerClassName="lgmd:hidden h-[32px]"
+      ></LoadingSkeleton>
+    </>
+  );
+};
+
+const CommentsLoading = () => {
+  return (
+    <>
+      <LoadingSkeleton
+        baseColor="#F2F4FE"
+        highlightColor="#F8F9FE"
+        width={30}
+        height={40}
+        containerClassName="mt-0 h-[40px] sm:hidden"
+        borderRadius={10}
+      ></LoadingSkeleton>
+      <LoadingSkeleton
+        baseColor="#F2F4FE"
+        highlightColor="#F8F9FE"
+        width={40}
+        height={20}
+        containerClassName="mt-0 h-[20px] lgmd:hidden"
+      ></LoadingSkeleton>
+    </>
   );
 };

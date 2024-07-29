@@ -4,25 +4,32 @@ import { ComponentProps } from "react";
 import { twMerge } from "tailwind-merge";
 import Icon from "./Icon";
 
-const buttonStyles = cva(["h4", "rounded-[10px]", "py-3", "px-6"], {
-  variants: {
-    color: {
-      transparent: ["bg-transparent", "text-steel-blue"],
-      violet: ["bg-electric-violet", "text-white", "hover:bg-[#C75AF6]"],
-      "dark-sky-blue": ["bg-dark-sky-blue", "text-white", "hover:bg-[#7C91F9]"],
-      "navy-blue": ["bg-navy-blue", "text-white", "hover:bg-[#656EA3]"],
-      crimson: ["bg-crimson", "text-white", "hover:bg-[#E98888]"],
+const buttonStyles = cva(
+  ["h4", "rounded-[10px]", "py-3", "px-6", "disabled:opacity-50"],
+  {
+    variants: {
+      color: {
+        transparent: ["bg-transparent", "text-steel-blue"],
+        violet: ["bg-electric-violet", "text-white", "hover:bg-[#C75AF6]"],
+        "dark-sky-blue": [
+          "bg-dark-sky-blue",
+          "text-white",
+          "hover:bg-[#7C91F9]",
+        ],
+        "navy-blue": ["bg-navy-blue", "text-white", "hover:bg-[#656EA3]"],
+        crimson: ["bg-crimson", "text-white", "hover:bg-[#E98888]"],
+      },
+      variant: {
+        text: [],
+        "text-with-icon": ["flex", "items-center", "gap-4"],
+      },
     },
-    variant: {
-      text: [],
-      "text-with-icon": ["flex", "items-center", "gap-4"],
+    defaultVariants: {
+      color: "violet",
+      variant: "text",
     },
-  },
-  defaultVariants: {
-    color: "violet",
-    variant: "text",
-  },
-});
+  }
+);
 
 type ButtonProps = VariantProps<typeof buttonStyles> &
   ComponentProps<"button"> & { icon?: StaticImport; iconColor?: string };
