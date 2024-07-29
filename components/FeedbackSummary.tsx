@@ -3,22 +3,22 @@ import { useRemoveUpvote } from "@/hooks/useRemoveUpvote";
 import { useUpvote } from "@/hooks/useUpvote";
 import { FeedbackWithUpVotesAndComments } from "@/types/Feedback";
 import { UpVote } from "@prisma/client";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React, { memo, useRef } from "react";
 import FeedbackType from "./FeedbackType";
 import UpVoteButton from "./UpVote";
-import Image from "next/image";
 import CommentsIcon from "/public/shared/icon-comments.svg";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 interface FeedbackSummaryProps {
   feedback: FeedbackWithUpVotesAndComments;
   myUpVotes: UpVote[];
+  commentsNumber?: number;
   to?: string;
 }
 
 const FeedbackSummary = memo(
-  ({ feedback, myUpVotes, to }: FeedbackSummaryProps) => {
+  ({ feedback, myUpVotes, commentsNumber, to }: FeedbackSummaryProps) => {
     const { data } = useGetFeedbackId(feedback.id, feedback);
     const ref = useRef<HTMLDivElement>(null);
 
@@ -79,7 +79,7 @@ const FeedbackSummary = memo(
           <div className="lgmd:col-start-3 sm:row-start-2 flex items-center gap-2 ml-auto self-center">
             <Image src={CommentsIcon} alt="Comments Icon" />
             <p className="body1 text-navy-blue font-bold">
-              {data?.comments.length}
+              {commentsNumber ?? data?.comments.length}
             </p>
           </div>
         </div>
