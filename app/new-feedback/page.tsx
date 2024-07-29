@@ -1,32 +1,24 @@
 "use client";
-import Icon from "@/components/Icon";
 import Image from "next/image";
 
 import Button from "@/components/Button";
 import Dropdown from "@/components/Dropdown";
+import GoBack from "@/components/GoBack";
 import TextField from "@/components/TextField";
+import { useCreateFeedback } from "@/hooks/useCreateFeedback";
 import { feedbackSchema } from "@/schemas/feedbackSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category } from "@prisma/client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import LeftArrowIcon from "/public/shared/icon-arrow-left.svg";
 import NewFeedbackIcon from "/public/shared/icon-new-feedback.svg";
-import { useCreateFeedback } from "@/hooks/useCreateFeedback";
 
 const page = () => {
   return (
     <div className="w-full h-screen bg-cloud-white lg:py-[92px] md:py-14 sm:py-[34px] grid">
       <div className="justify-self-center px-6 lgmd:w-[640px]">
-        <Link
-          href=".."
-          className="flex gap-4 items-center mb-[68px] cursor-pointer"
-        >
-          <Icon icon={LeftArrowIcon} color="#4661E6"></Icon>
-          Go Back
-        </Link>
+        <GoBack className="mb-[68px]"></GoBack>
         <NewFeedbackForm></NewFeedbackForm>
       </div>
     </div>
@@ -49,6 +41,11 @@ const NewFeedbackForm = () => {
   const onSubmit = (data: feedbackType) => {
     mutate(data);
   };
+
+  const options = Object.values(Category).map((category) => ({
+    label: category,
+    value: category,
+  }));
 
   return (
     <form
@@ -78,10 +75,10 @@ const NewFeedbackForm = () => {
             Choose a category for your feedback{" "}
           </p>
           <Dropdown
-            options={Object.values(Category)}
-            defaultOption={Object.values(Category)[0]}
+            options={options}
+            defaultOption={options[0]}
             color="cloudy-white"
-            onValueChange={(value) => {
+            onValueChange={({ value }) => {
               setValue("category", value);
             }}
           ></Dropdown>

@@ -80,7 +80,7 @@ const Dropdown = ({
   }, [ref]);
 
   return (
-    <div className="relative z-10" ref={ref}>
+    <div className="relative z-[5]" ref={ref}>
       <DropdownToggle
         dropdownToggleLabel={dropdownToggleLabel}
         defaultMessage={defaultMessage}

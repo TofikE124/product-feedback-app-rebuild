@@ -6,7 +6,7 @@ import Icon from "./Icon";
 interface UpVoteProps {
   votes: number;
   active?: boolean;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 const UpVoteButton = ({ active, votes, onClick }: UpVoteProps) => {

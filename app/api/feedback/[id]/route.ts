@@ -1,4 +1,5 @@
 import prisma from "@/prisma/client";
+import { delay } from "@/utils/delay";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,6 +8,8 @@ interface Props {
 }
 
 export async function GET(request: NextRequest, { params: { id } }: Props) {
+  await delay(1000);
+
   const session = await getServerSession();
   if (!session?.user)
     return NextResponse.json(

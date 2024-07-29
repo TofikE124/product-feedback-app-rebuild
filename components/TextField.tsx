@@ -5,7 +5,7 @@ import React, { ComponentProps, forwardRef } from "react";
 type TextFieldProps = {
   errorMessage?: string;
   textarea?: boolean;
-};
+} & (ComponentProps<"input"> & ComponentProps<"textarea">);
 
 const TextField = forwardRef(
   ({ errorMessage, textarea, ...props }: TextFieldProps, ref) => {
@@ -44,7 +44,7 @@ const TextFieldMain = forwardRef(
           <textarea
             ref={ref as any}
             {...props}
-            className="w-full resize-none bg-transparent outline-none body2 text-navy-blue"
+            className="w-full max-h-[150px] bg-transparent outline-none body2 text-navy-blue"
           ></textarea>
         ) : (
           <input

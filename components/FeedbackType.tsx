@@ -3,7 +3,7 @@ import React from "react";
 interface FeedbackTypeProps {
   text: string;
   active?: boolean;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 const FeedbackType = ({

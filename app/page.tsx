@@ -6,22 +6,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import Button from "@/components/Button";
 import Dropdown from "@/components/Dropdown";
-import UpVoteButton from "@/components/UpVote";
 
 import LoadingSkeleton from "@/components/LoadingSkeleton";
-import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
 import { useLoadFeedbacks as useGetFeedbacks } from "@/hooks/useGetFeedbacks";
 import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
-import { useRemoveUpvote } from "@/hooks/useRemoveUpvote";
-import { useUpvote } from "@/hooks/useUpvote";
-import { FeedbackWithUpVotesAndComments } from "@/types/Feedback";
-import { UpVote } from "@prisma/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { memo, useEffect, useState } from "react";
-import CommentsIcon from "/public/shared/icon-comments.svg";
+import { SortingDirection, SortingProperty } from "@/types/Sorting";
+import { useState } from "react";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
 import IllustrationEmpty from "/public/suggestions/illustration-empty.svg";
-import { SortingDirection, SortingProperty } from "@/types/Sorting";
+import FeedbackSummary from "@/components/FeedbackSummary";
+import FeedbackSummaryLoading from "@/components/FeedbackSummaryLoading";
 
 export default function Home() {
   return (
@@ -88,8 +82,6 @@ const SortByDropdown = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const queryClient = useQueryClient();
-
   const options: SortingOption[] = [
     {
       label: "Most Upvotes",
@@ -131,10 +123,20 @@ const SortByDropdown = () => {
     router.push(`/?${urlSearchParams.toString()}`);
   };
 
+  const getSelectedOption = () => {
+    const sortBy = searchParams.get("sortBy") as SortingProperty;
+    const sortDirection = searchParams.get("sortDirection") as SortingDirection;
+
+    return options.find(
+      ({ value: { direction, property } }) =>
+        direction == sortDirection && property == sortBy
+    );
+  };
+
   return (
     <Dropdown
       options={options}
-      defaultOption={options[0]}
+      defaultOption={getSelectedOption() || options[0]}
       dropdownToggleLabel="Sort By"
       onValueChange={handleValueChange}
     ></Dropdown>
@@ -165,7 +167,7 @@ interface SuggestionHeaderProps {
 
 const SuggestionHeader = ({ isOpened, onToggle }: SuggestionHeaderProps) => {
   return (
-    <div className="lg:h-[140px] md:basis-full flex justify-between items-center lgmd:p-6 sm:py-4 sm:px-6 z-20 lgmd:rounded-[10px] bg-cover lg:bg-[url(/suggestions/desktop/background-header.png)] md:bg-[url(/suggestions/tablet/background-header.png)] sm:bg-[url(/suggestions/mobile/background-header.png)]">
+    <div className="lg:h-[140px] md:basis-full flex justify-between lgmd:items-end sm:items-center lgmd:p-6 sm:py-4 sm:px-6 z-20 lgmd:rounded-[10px] bg-cover lg:bg-[url(/suggestions/desktop/background-header.png)] md:bg-[url(/suggestions/tablet/background-header.png)] sm:bg-[url(/suggestions/mobile/background-header.png)]">
       <div>
         <h2 className="h2 text-white">Tofik Elias</h2>
         <p className="body-2 text-white/75">Feedbak Board</p>
@@ -319,6 +321,7 @@ const Feedbacks = () => {
     <div className="flex flex-col gap-5 mb-10 sm:px-6">
       {feedbacks?.map((feedback) => (
         <FeedbackSummary
+          to={`/comments/${feedback.id}`}
           feedback={feedback}
           key={feedback.id}
           myUpVotes={upVotes}
@@ -327,149 +330,5 @@ const Feedbacks = () => {
     </div>
   ) : (
     <SuggestionsEmpty></SuggestionsEmpty>
-  );
-};
-
-interface FeedbackSummaryProps {
-  feedback: FeedbackWithUpVotesAndComments;
-  myUpVotes: UpVote[];
-}
-
-const FeedbackSummary = memo(
-  ({ feedback, myUpVotes }: FeedbackSummaryProps) => {
-    const { data } = useGetFeedbackId(feedback);
-
-    const isUpvoted = () =>
-      myUpVotes.some((vote) => vote.feedbackId == feedback.id);
-
-    const { mutate: handleUpVote, isPending: isUpVoting } = useUpvote(
-      feedback.id
-    );
-
-    const { mutate: handleRemoveUpvote, isPending: isRemovingUpVoting } =
-      useRemoveUpvote(feedback.id);
-
-    const handleUpvoteClick = () => {
-      if (isUpvoted()) handleRemoveUpvote();
-      else handleUpVote();
-    };
-
-    return (
-      <div className="bg-white rounded-[10px] lgmd:p-8 sm:p-6 w-full">
-        <div className="grid lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
-          <div className="lgmd:col-start-1 sm:row-start-2">
-            <UpVoteButton
-              votes={data.upVotes.length}
-              active={isUpvoted()}
-              onClick={handleUpvoteClick}
-            ></UpVoteButton>
-          </div>
-          <div className="lgmd:col-start-2 flex flex-col">
-            <h3 className="h3 text-navy-blue lgmd:mb-1 sm:mb-2">
-              {data.title}
-            </h3>
-            <p className="body1 text-steel-blue lgmd:mb-3 sm:mb-2">
-              {data.description}
-            </p>
-            <FeedbackType text={data.category}></FeedbackType>
-          </div>
-          <div className="lgmd:col-start-3 sm:row-start-2 flex items-center gap-2 ml-auto self-center">
-            <Image src={CommentsIcon} alt="Comments Icon" />
-            <p className="body1 text-navy-blue font-bold">2</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-);
-
-const FeedbackSummaryLoading = () => {
-  return (
-    <div className="bg-white rounded-[10px] lgmd:p-8 sm:p-6 w-full">
-      <div className="grid lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
-        <div className="lgmd:col-start-1 sm:row-start-2">
-          <UpvoteLoading />
-        </div>
-        <div className="lgmd:col-start-2 flex flex-col">
-          <LoadingSkeleton
-            baseColor="#F2F4FE"
-            highlightColor="#F8F9FE"
-            width={200}
-            height={26}
-            containerClassName="h-[26px]"
-          ></LoadingSkeleton>
-          <LoadingSkeleton
-            baseColor="#F2F4FE"
-            highlightColor="#F8F9FE"
-            width={200}
-            height={10}
-            containerClassName="mt-1 h-[10px]"
-          ></LoadingSkeleton>
-          <LoadingSkeleton
-            baseColor="#F2F4FE"
-            highlightColor="#F8F9FE"
-            width={150}
-            height={10}
-            className="h-[10px] mt-2"
-          ></LoadingSkeleton>
-          <LoadingSkeleton
-            baseColor="#F2F4FE"
-            highlightColor="#F8F9FE"
-            width={80}
-            height={30}
-            containerClassName="mt-0 h-[30px]"
-            borderRadius={10}
-          ></LoadingSkeleton>
-        </div>
-        <div className="lgmd:col-start-3 sm:row-start-2 flex items-center gap-2 ml-auto self-center">
-          <CommentsLoading></CommentsLoading>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const UpvoteLoading = () => {
-  return (
-    <>
-      <LoadingSkeleton
-        baseColor="#F2F4FE"
-        highlightColor="#F8F9FE"
-        width={40}
-        height={53}
-        borderRadius={10}
-        containerClassName="sm:hidden h-[53px]"
-      ></LoadingSkeleton>
-      <LoadingSkeleton
-        baseColor="#F2F4FE"
-        highlightColor="#F8F9FE"
-        width={70}
-        height={32}
-        borderRadius={10}
-        containerClassName="lgmd:hidden h-[32px]"
-      ></LoadingSkeleton>
-    </>
-  );
-};
-
-const CommentsLoading = () => {
-  return (
-    <>
-      <LoadingSkeleton
-        baseColor="#F2F4FE"
-        highlightColor="#F8F9FE"
-        width={30}
-        height={40}
-        containerClassName="mt-0 h-[40px] sm:hidden"
-        borderRadius={10}
-      ></LoadingSkeleton>
-      <LoadingSkeleton
-        baseColor="#F2F4FE"
-        highlightColor="#F8F9FE"
-        width={40}
-        height={20}
-        containerClassName="mt-0 h-[20px] lgmd:hidden"
-      ></LoadingSkeleton>
-    </>
   );
 };
