@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Icon from "./Icon";
-import LeftArrowIcon from "/public/shared/icon-arrow-left.svg";
+import LeftArrowIcon from "/public/shared/icon-caret-left.svg";
 import { twMerge } from "tailwind-merge";
 
 interface Props {

@@ -44,7 +44,7 @@ const TextFieldMain = forwardRef(
           <textarea
             ref={ref as any}
             {...props}
-            className="w-full max-h-[150px] bg-transparent outline-none body2 text-navy-blue"
+            className="w-full h-[30px] max-h-[150px] bg-transparent outline-none body2 text-navy-blue"
           ></textarea>
         ) : (
           <input

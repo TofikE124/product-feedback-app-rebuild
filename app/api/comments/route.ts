@@ -29,10 +29,15 @@ export async function POST(request: NextRequest) {
       { status: 401 }
     );
 
-  const { content, feedbackId } = body;
+  const { content, feedbackId, parentId } = body;
 
   const newComment = await prisma.comment.create({
-    data: { content, feedbackId: feedbackId, userId: user.id },
+    data: {
+      content,
+      feedbackId: feedbackId,
+      userId: user.id,
+      parentId,
+    },
   });
 
   return NextResponse.json(newComment, { status: 200 });

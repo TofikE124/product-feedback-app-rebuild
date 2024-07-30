@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Icon from "./Icon";
 import { AnimatePresence, motion } from "framer-motion";
 
-import ArrowDownIcon from "/public/shared/icon-arrow-down.svg";
+import ArrowDownIcon from "/public/shared/icon-caret-down.svg";
 import CheckIcon from "/public/shared/icon-check.svg";
 import { cva, VariantProps } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";

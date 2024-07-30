@@ -1,7 +1,6 @@
-import Image from "next/image";
 import React from "react";
-import UpArrow from "/public/shared/icon-arrow-up.svg";
 import Icon from "./Icon";
+import UpArrow from "/public/shared/icon-caret-up.svg";
 
 interface UpVoteProps {
   votes: number;

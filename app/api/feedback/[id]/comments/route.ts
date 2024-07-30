@@ -25,8 +25,8 @@ export async function GET(request: NextRequest, { params: { id } }: Props) {
     );
 
   const comments = await prisma.comment.findMany({
-    where: { feedbackId: id },
-    include: { user: true },
+    where: { feedbackId: id, parentId: null },
+    include: { user: true, replies: { select: { _count: true } } },
   });
 
   return NextResponse.json(comments, { status: 200 });

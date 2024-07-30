@@ -5,7 +5,7 @@ import React from "react";
 
 interface IconProps {
   icon: StaticImport & { src?: string };
-  color: string;
+  color?: string;
 }
 
 const Icon = ({ icon, color }: IconProps) => {
