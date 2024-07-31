@@ -28,15 +28,16 @@ import PlusCircleIcon from "/public/shared/icon-plus-circle.svg";
 
 import ExpandableTextField from "@/components/ExpandableTextField";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { useCommentVote } from "@/hooks/useCommentVote";
 import { useCreateReply } from "@/hooks/useCreateReply";
+import { useGetCommentVotes } from "@/hooks/useGetCommentVotes";
 import { useGetReplies } from "@/hooks/useGetReplies";
 import { useIsOwnFeedback } from "@/hooks/useIsOwnFeedback";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import Link from "next/link";
-import { useCommentVote } from "@/hooks/useCommentVote";
-import { useGetCommentVotes } from "@/hooks/useGetCommentVotes";
 import { calculateCommentVotesSum } from "@/utils/calculateCommentVotesSum";
+import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { useState } from "react";
+import { useRemoveCommentVote } from "@/hooks/useRemoveCommentVote";
 
 interface Props {
   params: { id: string };
@@ -592,14 +593,19 @@ interface CommentVoteProps {
 
 const CommentVote = ({ commentId }: CommentVoteProps) => {
   const { data } = useGetCommentVotes(commentId);
-  const { mutate } = useCommentVote(commentId);
+
+  const { mutate: voteOnComment } = useCommentVote(commentId);
+  const { mutate: removeVoteOnComment } = useRemoveCommentVote(commentId);
+
   const handleUpvoteClick = () => {
     if (data?.myVoteType == "UPVOTE") {
-    } else mutate("UPVOTE");
+      removeVoteOnComment();
+    } else voteOnComment("UPVOTE");
   };
   const handleDownvoteClick = () => {
     if (data?.myVoteType == "DOWNVOTE") {
-    } else mutate("DOWNVOTE");
+      removeVoteOnComment();
+    } else voteOnComment("DOWNVOTE");
   };
 
   return (
@@ -608,10 +614,11 @@ const CommentVote = ({ commentId }: CommentVoteProps) => {
         onClick={handleUpvoteClick}
         className="p-2 hover:bg-steel-blue/10 rounded-full cursor-pointer"
       >
-        <Icon
-          icon={data?.myVoteType == "UPVOTE" ? UpArrowIconFilled : UpArrowIcon}
-          color="black"
-        />
+        {data?.myVoteType == "UPVOTE" ? (
+          <Icon icon={UpArrowIconFilled} color="black" />
+        ) : (
+          <Icon icon={UpArrowIcon} color="black" />
+        )}
       </button>
       <div>
         <h4 className="h4 text-navy-blue">
@@ -622,12 +629,11 @@ const CommentVote = ({ commentId }: CommentVoteProps) => {
         onClick={handleDownvoteClick}
         className="p-2 hover:bg-steel-blue/10 rounded-full cursor-pointer"
       >
-        <Icon
-          icon={
-            data?.myVoteType == "DOWNVOTE" ? DownArrowIconFilled : DownArrowIcon
-          }
-          color="black"
-        />
+        {data?.myVoteType == "DOWNVOTE" ? (
+          <Icon icon={DownArrowIconFilled} color="black" />
+        ) : (
+          <Icon icon={DownArrowIcon} color="black" />
+        )}
       </button>
     </div>
   );
