@@ -28,9 +28,10 @@ import ExpandableTextField from "@/components/ExpandableTextField";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import { useCreateReply } from "@/hooks/useCreateReply";
 import { useGetReplies } from "@/hooks/useGetReplies";
+import { useIsOwnFeedback } from "@/hooks/useIsOwnFeedback";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 interface Props {
   params: { id: string };
@@ -39,16 +40,12 @@ interface Props {
 const page = ({ params: { id } }: Props) => {
   const { data: feedback, isLoading: isFeedbackLoading } = useGetFeedbackId(id);
   const { data: upvotes } = useGetUserUpvotes();
-  const {
-    data: comments,
-    isLoading: isCommentsLoading,
-    fetchStatus: commentsFetchStataus,
-  } = useGetComments(id);
+  const { data: comments, isLoading: isCommentsLoading } = useGetComments(id);
 
   return (
     <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen flex mdsm:flex-col lgmd:gap-8 lg:py-[50px] md:pt-[40px] md:pb-[40px] sm:py-[25px] sm:px-4">
       <div className="flex flex-col w-full">
-        <Header></Header>
+        <Header feedbackId={feedback?.id}></Header>
         <div className="flex flex-col w-full h-full rounded-[10px] overflow-hidden bg-white">
           <CommentsFeedbackSummary
             feedback={feedback!}
@@ -72,15 +69,34 @@ const page = ({ params: { id } }: Props) => {
   );
 };
 
-const Header = () => {
+interface HeaderProps {
+  feedbackId?: string;
+}
+
+const Header = ({ feedbackId }: HeaderProps) => {
   return (
     <>
-      <div className="flex items-center justify-between w-full mb-9">
+      <div className="flex items-center justify-between w-full mb-9 h-[45px]">
         <GoBack></GoBack>
-        <Button color="dark-sky-blue">Edit Feedback</Button>
+        {feedbackId ? (
+          <EditFeedback feedbackId={feedbackId}></EditFeedback>
+        ) : null}
       </div>
     </>
   );
+};
+
+interface EditFeedbackProps {
+  feedbackId: string;
+}
+
+const EditFeedback = ({ feedbackId }: EditFeedbackProps) => {
+  const { data: isOwn, fetchStatus } = useIsOwnFeedback(feedbackId);
+  return isOwn ? (
+    <Link href={`/feedbacks/${feedbackId}/edit`}>
+      <Button color="dark-sky-blue">Edit Feedback</Button>
+    </Link>
+  ) : null;
 };
 
 interface CommentsFeedbackSummaryProps {
@@ -496,6 +512,7 @@ const CommentSummaryUserImage = ({
         alt={`${userName}'s image`}
         width={40}
         height={40}
+        className="rounded-full"
       />
       {isReply ? <ImageLeftBorder></ImageLeftBorder> : null}
     </div>

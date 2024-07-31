@@ -50,7 +50,7 @@ const TextFieldMain = forwardRef(
           <input
             ref={ref as any}
             {...props}
-            className="bg-transparent outline-none body2 text-navy-blue"
+            className="bg-transparent outline-none body2 text-navy-blue w-full"
           ></input>
         )}
       </motion.div>
