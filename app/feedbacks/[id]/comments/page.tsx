@@ -8,8 +8,8 @@ import { useGetComments } from "@/hooks/useGetComments";
 import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
 import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
 import { createCommentSchema } from "@/schemas/createCommentSchema";
-import { CommentWithUserAndRepliesLength } from "@/types/Comment";
-import { FeedbackWithUpVotesAndComments } from "@/types/Feedback";
+import { CommentWith_User_RepliesLength } from "@/types/Comment";
+import { FeedbackWith_UpVotes_Comments } from "@/types/Feedback";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UpVote } from "@prisma/client";
 import moment from "moment";
@@ -18,7 +18,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import Icon from "@/components/Icon";
+import DownArrowIconFilled from "/public/shared/icon-arrow-down-filled.svg";
 import DownArrowIcon from "/public/shared/icon-arrow-down.svg";
+import UpArrowIconFilled from "/public/shared/icon-arrow-up-filled.svg";
 import UpArrowIcon from "/public/shared/icon-arrow-up.svg";
 import CommentIcon from "/public/shared/icon-comments.svg";
 import MinusCircleIcon from "/public/shared/icon-minus-circle.svg";
@@ -32,6 +34,9 @@ import { useIsOwnFeedback } from "@/hooks/useIsOwnFeedback";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import Link from "next/link";
+import { useCommentVote } from "@/hooks/useCommentVote";
+import { useGetCommentVotes } from "@/hooks/useGetCommentVotes";
+import { calculateCommentVotesSum } from "@/utils/calculateCommentVotesSum";
 
 interface Props {
   params: { id: string };
@@ -101,7 +106,7 @@ const EditFeedback = ({ feedbackId }: EditFeedbackProps) => {
 
 interface CommentsFeedbackSummaryProps {
   isFeedbackLoading: boolean;
-  feedback: FeedbackWithUpVotesAndComments;
+  feedback: FeedbackWith_UpVotes_Comments;
   upvotes: UpVote[];
   commentsNumber: number;
 }
@@ -197,7 +202,7 @@ const AddCommentLoading = () => {
 };
 
 interface CommentProps {
-  comments: CommentWithUserAndRepliesLength[];
+  comments: CommentWith_User_RepliesLength[];
 }
 
 const Comments = ({ comments }: CommentProps) => {
@@ -341,7 +346,7 @@ const CommentSummaryLoading = () => {
 };
 
 interface CommentSummaryProps {
-  comment: CommentWithUserAndRepliesLength;
+  comment: CommentWith_User_RepliesLength;
   index?: number;
   isReply?: boolean;
 }
@@ -404,6 +409,7 @@ export const CommentSummary = ({
           <div className="relative flex flex-col w-full">
             <p className="body2 text-steel-blue mb-2">{comment.content}</p>
             <CommentFooter
+              commentId={comment.id}
               onReplyClick={() => setIsReplying(true)}
             ></CommentFooter>
           </div>
@@ -562,14 +568,15 @@ const ReplyLeftBorder = () => {
 
 interface CommentFooterProps {
   onReplyClick?: () => void;
+  commentId: string;
 }
 
-const CommentFooter = ({ onReplyClick: onReply }: CommentFooterProps) => {
+const CommentFooter = ({ onReplyClick, commentId }: CommentFooterProps) => {
   return (
     <div className="flex">
-      <CommentVote></CommentVote>
+      <CommentVote commentId={commentId}></CommentVote>
       <button
-        onClick={onReply}
+        onClick={onReplyClick}
         className="flex gap-2 items-center hover:bg-steel-blue/10 rounded-full px-4 py-2"
       >
         <Image src={CommentIcon} alt="Comments Icon"></Image>
@@ -579,18 +586,49 @@ const CommentFooter = ({ onReplyClick: onReply }: CommentFooterProps) => {
   );
 };
 
-const CommentVote = () => {
+interface CommentVoteProps {
+  commentId: string;
+}
+
+const CommentVote = ({ commentId }: CommentVoteProps) => {
+  const { data } = useGetCommentVotes(commentId);
+  const { mutate } = useCommentVote(commentId);
+  const handleUpvoteClick = () => {
+    if (data?.myVoteType == "UPVOTE") {
+    } else mutate("UPVOTE");
+  };
+  const handleDownvoteClick = () => {
+    if (data?.myVoteType == "DOWNVOTE") {
+    } else mutate("DOWNVOTE");
+  };
+
   return (
     <div className="flex items-center -ml-2">
-      <div className="p-2 hover:bg-steel-blue/10 rounded-full cursor-pointer">
-        <Icon icon={UpArrowIcon} color="black" />
-      </div>
+      <button
+        onClick={handleUpvoteClick}
+        className="p-2 hover:bg-steel-blue/10 rounded-full cursor-pointer"
+      >
+        <Icon
+          icon={data?.myVoteType == "UPVOTE" ? UpArrowIconFilled : UpArrowIcon}
+          color="black"
+        />
+      </button>
       <div>
-        <h4 className="h4 text-navy-blue">1.2K</h4>
+        <h4 className="h4 text-navy-blue">
+          {calculateCommentVotesSum(data?.votes || [])}
+        </h4>
       </div>
-      <div className="p-2 hover:bg-steel-blue/10 rounded-full cursor-pointer">
-        <Icon icon={DownArrowIcon} color="black" />
-      </div>
+      <button
+        onClick={handleDownvoteClick}
+        className="p-2 hover:bg-steel-blue/10 rounded-full cursor-pointer"
+      >
+        <Icon
+          icon={
+            data?.myVoteType == "DOWNVOTE" ? DownArrowIconFilled : DownArrowIcon
+          }
+          color="black"
+        />
+      </button>
     </div>
   );
 };

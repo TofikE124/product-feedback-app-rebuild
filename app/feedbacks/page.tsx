@@ -307,6 +307,22 @@ const Feedbacks = () => {
   const { data: upVotes } = useGetUserUpvotes();
   const { data: feedbacks, fetchStatus } = useGetFeedbacks();
 
+  if (fetchStatus == "fetching" && feedbacks?.length) {
+    return (
+      <div className="flex flex-col gap-5 mb-10 sm:px-6">
+        {feedbacks.map((feedback) => (
+          <FeedbackSummary
+            to={`/feedbacks/${feedback.id}/comments`}
+            feedback={feedback}
+            key={feedback.id}
+            myUpVotes={upVotes}
+          ></FeedbackSummary>
+        ))}
+        <FeedbackSummaryLoading></FeedbackSummaryLoading>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-5 mb-10 sm:px-6">
       {fetchStatus == "fetching" ? (

@@ -1,5 +1,5 @@
 import prisma from "@/prisma/client";
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 interface Props {
@@ -17,20 +17,19 @@ export async function GET(request: NextRequest, { params: { id } }: Props) {
   const user = await prisma.user.findUnique({
     where: { email: session.user.email! },
   });
-
   if (!user)
     return NextResponse.json(
       { message: "You are not allowed to do that" },
       { status: 401 }
     );
 
-  const comments = await prisma.comment.findMany({
-    where: { feedbackId: id, parentId: null },
-    include: {
-      user: true,
-      replies: { select: { _count: true } },
-    },
+  const myVote = await prisma.commentVote.findFirst({
+    where: { commentId: id, userId: user.id },
   });
 
-  return NextResponse.json(comments, { status: 200 });
+  const votes = await prisma.commentVote.findMany({ where: { commentId: id } });
+  return NextResponse.json(
+    { votes, myVoteType: myVote?.voteType || null },
+    { status: 200 }
+  );
 }

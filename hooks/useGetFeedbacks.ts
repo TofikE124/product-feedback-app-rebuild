@@ -1,5 +1,5 @@
 "use client";
-import { FeedbackWithUpVotesAndComments } from "@/types/Feedback";
+import { FeedbackWith_UpVotes_Comments } from "@/types/Feedback";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
@@ -15,7 +15,7 @@ export const useLoadFeedbacks = () => {
     queryFn: () => {
       return axios
         .get("/api/feedback", { params: { sortBy, sortDirection, category } })
-        .then((res) => res.data as FeedbackWithUpVotesAndComments[]);
+        .then((res) => res.data as FeedbackWith_UpVotes_Comments[]);
     },
     staleTime: 1000 * 60 * 5,
   });

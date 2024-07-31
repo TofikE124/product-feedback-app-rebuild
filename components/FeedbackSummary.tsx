@@ -1,7 +1,7 @@
 import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
 import { useRemoveUpvote } from "@/hooks/useRemoveUpvote";
 import { useUpvote } from "@/hooks/useUpvote";
-import { FeedbackWithUpVotesAndComments } from "@/types/Feedback";
+import { FeedbackWith_UpVotes_Comments } from "@/types/Feedback";
 import { UpVote } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ import CommentsIcon from "/public/shared/icon-comments.svg";
 import { twMerge } from "tailwind-merge";
 
 interface FeedbackSummaryProps {
-  feedback: FeedbackWithUpVotesAndComments;
+  feedback: FeedbackWith_UpVotes_Comments;
   myUpVotes: UpVote[];
   commentsNumber?: number;
   to?: string;

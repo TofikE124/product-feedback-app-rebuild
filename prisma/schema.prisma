@@ -139,7 +139,7 @@ enum VoteType {
 }
 
 model CommentVote {
-  id        Int      @id @default(autoincrement())
+  id          String      @id @default(cuid())
   voteType  VoteType
   user      User     @relation(fields: [userId], references: [id])
   userId    String

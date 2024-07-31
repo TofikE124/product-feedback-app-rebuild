@@ -1,4 +1,4 @@
-import { FeedbackWithUpVotes } from "@/types/Feedback";
+import { FeedbackWith_UpVotes } from "@/types/Feedback";
 import { UpVote } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -17,7 +17,7 @@ export const useRemoveUpvote = (id: string) => {
       const oldFeedback = queryClient.getQueryData([
         "feedbacks",
         id,
-      ]) as FeedbackWithUpVotes;
+      ]) as FeedbackWith_UpVotes;
 
       let newUpvotes: UpVote[] = [...oldUpvotes];
 

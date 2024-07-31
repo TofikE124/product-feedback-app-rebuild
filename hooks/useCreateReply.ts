@@ -8,7 +8,11 @@ export const useCreateReply = (feedbackId: string, commentId: string) => {
   const mutation = useMutation({
     mutationKey: ["comments", commentId, "replies"],
     mutationFn: ({ content }: { content: string }) =>
-      axios.post("/api/comments", { content, feedbackId, parentId: commentId }),
+      axios.post(`/api/comments/${commentId}/reply`, {
+        content,
+        feedbackId,
+        parentId: commentId,
+      }),
     onMutate: async ({ content }) => {},
     onError: (error) => {
       console.log(error);
