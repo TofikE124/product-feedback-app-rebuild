@@ -7,7 +7,7 @@ import axios from "axios";
 
 export const useGetComments = (feedbackId: string) => {
   const query = useQuery({
-    queryKey: ["comments", feedbackId],
+    queryKey: ["feedbacks", feedbackId, "comments"],
     queryFn: () =>
       axios
         .get(`/api/feedback/${feedbackId}/comments`)

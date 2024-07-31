@@ -1,8 +1,18 @@
+import { twMerge } from "tailwind-merge";
 import LoadingSkeleton from "./LoadingSkeleton";
 
-const FeedbackSummaryLoading = () => {
+interface FeedbackSummaryLoadingProps {
+  className?: string;
+}
+
+const FeedbackSummaryLoading = ({ className }: FeedbackSummaryLoadingProps) => {
   return (
-    <div className="bg-white rounded-[10px] h-fit lgmd:p-8 sm:p-6 w-full">
+    <div
+      className={twMerge(
+        "bg-white rounded-[10px] h-fit lgmd:p-8 sm:p-6 w-full",
+        className
+      )}
+    >
       <div className="grid lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
         <div className="lgmd:col-start-1 sm:row-start-2">
           <UpvoteLoading />

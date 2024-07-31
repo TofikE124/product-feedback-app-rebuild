@@ -9,16 +9,24 @@ import React, { memo, useRef } from "react";
 import FeedbackType from "./FeedbackType";
 import UpVoteButton from "./UpVote";
 import CommentsIcon from "/public/shared/icon-comments.svg";
+import { twMerge } from "tailwind-merge";
 
 interface FeedbackSummaryProps {
   feedback: FeedbackWithUpVotesAndComments;
   myUpVotes: UpVote[];
   commentsNumber?: number;
   to?: string;
+  className?: string;
 }
 
 const FeedbackSummary = memo(
-  ({ feedback, myUpVotes, commentsNumber, to }: FeedbackSummaryProps) => {
+  ({
+    feedback,
+    myUpVotes,
+    commentsNumber,
+    to,
+    className,
+  }: FeedbackSummaryProps) => {
     const { data } = useGetFeedbackId(feedback.id, feedback);
     const ref = useRef<HTMLDivElement>(null);
 
@@ -52,9 +60,12 @@ const FeedbackSummary = memo(
       <div
         onClick={handleBackgroundClick}
         ref={ref}
-        className={`relative bg-white rounded-[10px] h-fit lgmd:p-8 sm:p-6 w-full ${
-          to ? "cursor-pointer" : ""
-        }`}
+        className={twMerge(
+          `relative bg-white rounded-[10px] h-fit lgmd:p-8 sm:p-6 w-full ${
+            to ? "cursor-pointer" : ""
+          }`,
+          className
+        )}
       >
         <div className="relative grid z-[2] lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
           <div className="lgmd:col-start-1 sm:row-start-2">

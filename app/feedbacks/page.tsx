@@ -30,9 +30,9 @@ export default function Home() {
   );
 }
 
-const SuggestionsEmpty = () => {
+const FeedbacksEmpty = () => {
   return (
-    <div className="w-full h-full bg-white rounded-[10px] lg:py-[110px] sm:py-[76px]  grid place-items-center">
+    <div className="w-full h-full bg-white rounded-[10px] lg:py-[110px] md:py-[90px] sm:py-[76px] grid place-items-center">
       <div className="max-w-[400px] text-center flex flex-col items-center">
         <Image
           className="mb-[50px]"
@@ -241,7 +241,7 @@ const SuggestionFilter = () => {
     if (value) newSearchParams.set("category", value);
     else newSearchParams.delete("category");
 
-    router.push(`/feedbacks?${newSearchParams.toString()}`);
+    router.push(`/feedbacks?${newSearchParams.toString()}`, { scroll: false });
   };
 
   const currentFilter = searchParams.get("category");
@@ -307,27 +307,26 @@ const Feedbacks = () => {
   const { data: upVotes } = useGetUserUpvotes();
   const { data: feedbacks, fetchStatus } = useGetFeedbacks();
 
-  if (fetchStatus == "fetching")
-    return (
-      <div className="flex flex-col gap-5 mb-10">
-        <FeedbackSummaryLoading></FeedbackSummaryLoading>
-        <FeedbackSummaryLoading></FeedbackSummaryLoading>
-        <FeedbackSummaryLoading></FeedbackSummaryLoading>
-      </div>
-    );
-
-  return feedbacks?.length ? (
+  return (
     <div className="flex flex-col gap-5 mb-10 sm:px-6">
-      {feedbacks?.map((feedback) => (
-        <FeedbackSummary
-          to={`/feedbacks/${feedback.id}/comments`}
-          feedback={feedback}
-          key={feedback.id}
-          myUpVotes={upVotes}
-        ></FeedbackSummary>
-      ))}
+      {fetchStatus == "fetching" ? (
+        <>
+          <FeedbackSummaryLoading></FeedbackSummaryLoading>
+          <FeedbackSummaryLoading></FeedbackSummaryLoading>
+          <FeedbackSummaryLoading></FeedbackSummaryLoading>
+        </>
+      ) : feedbacks?.length ? (
+        feedbacks?.map((feedback) => (
+          <FeedbackSummary
+            to={`/feedbacks/${feedback.id}/comments`}
+            feedback={feedback}
+            key={feedback.id}
+            myUpVotes={upVotes}
+          ></FeedbackSummary>
+        ))
+      ) : (
+        <FeedbacksEmpty></FeedbacksEmpty>
+      )}
     </div>
-  ) : (
-    <SuggestionsEmpty></SuggestionsEmpty>
   );
 };

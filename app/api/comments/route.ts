@@ -1,10 +1,12 @@
 import prisma from "@/prisma/client";
 import { createCommentSchema } from "@/schemas/createCommentSchema";
+import { delay } from "@/utils/delay";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 export async function POST(request: NextRequest) {
+  await delay(3000);
   type createCommentType = z.infer<typeof createCommentSchema>;
   const body = (await request.json()) as createCommentType;
 

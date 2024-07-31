@@ -6,17 +6,14 @@ export const useCreateComment = (feedbackId: string) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationKey: ["comments", feedbackId],
-    mutationFn: ({
-      content,
-      parentId,
-    }: {
-      content: string;
-      parentId?: string;
-    }) => axios.post("/api/comments", { content, feedbackId, parentId }),
+    mutationKey: ["feedbacks", feedbackId, "comments"],
+    mutationFn: ({ content }: { content: string; parentId?: string }) =>
+      axios.post("/api/comments", { content, feedbackId }),
     onError: () => {},
-    onSettled: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["comments", feedbackId] });
+    onSettled: (data, error, { parentId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["feedbacks", feedbackId, "comments"],
+      });
     },
   });
 

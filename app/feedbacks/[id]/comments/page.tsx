@@ -3,7 +3,6 @@ import Button from "@/components/Button";
 import FeedbackSummary from "@/components/FeedbackSummary";
 import FeedbackSummaryLoading from "@/components/FeedbackSummaryLoading";
 import GoBack from "@/components/GoBack";
-import TextField from "@/components/TextField";
 import { useCreateComment } from "@/hooks/useCreateComment";
 import { useGetComments } from "@/hooks/useGetComments";
 import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
@@ -22,82 +21,112 @@ import Icon from "@/components/Icon";
 import DownArrowIcon from "/public/shared/icon-arrow-down.svg";
 import UpArrowIcon from "/public/shared/icon-arrow-up.svg";
 import CommentIcon from "/public/shared/icon-comments.svg";
-import PlusIcon from "/public/shared/icon-plus.svg";
+import MinusCircleIcon from "/public/shared/icon-minus-circle.svg";
+import PlusCircleIcon from "/public/shared/icon-plus-circle.svg";
 
+import ExpandableTextField from "@/components/ExpandableTextField";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { useCreateReply } from "@/hooks/useCreateReply";
+import { useGetReplies } from "@/hooks/useGetReplies";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
 
 interface Props {
   params: { id: string };
 }
 
 const page = ({ params: { id } }: Props) => {
-  const { data: feedback, isLoading } = useGetFeedbackId(id);
+  const { data: feedback, isLoading: isFeedbackLoading } = useGetFeedbackId(id);
   const { data: upvotes } = useGetUserUpvotes();
-  const { data: comments } = useGetComments(id);
+  const {
+    data: comments,
+    isLoading: isCommentsLoading,
+    fetchStatus: commentsFetchStataus,
+  } = useGetComments(id);
 
   return (
-    <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen flex mdsm:flex-col lgmd:gap-8 lg:py-[94px] md:pt-[94px] md:pb-[40px] sm:pb-[50px]">
+    <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen flex mdsm:flex-col lgmd:gap-8 lg:py-[50px] md:pt-[40px] md:pb-[40px] sm:py-[25px] sm:px-4">
       <div className="flex flex-col w-full">
-        <Header
-          feedback={feedback!}
-          commentsNumber={comments?.length}
-          isLoading={isLoading}
-          upvotes={upvotes}
-        ></Header>
-        {feedback ? (
-          <AddComment feedbackId={feedback?.id || ""}></AddComment>
-        ) : null}
-        <Comments comments={comments || []}></Comments>
+        <Header></Header>
+        <div className="flex flex-col w-full h-full rounded-[10px] overflow-hidden bg-white">
+          <CommentsFeedbackSummary
+            feedback={feedback!}
+            commentsNumber={comments?.length!}
+            isFeedbackLoading={isFeedbackLoading}
+            upvotes={upvotes}
+          ></CommentsFeedbackSummary>
+          {feedback ? (
+            <AddComment feedbackId={feedback?.id || ""}></AddComment>
+          ) : (
+            <AddCommentLoading></AddCommentLoading>
+          )}
+          {isCommentsLoading ? (
+            <CommentsLoading></CommentsLoading>
+          ) : (
+            <Comments comments={comments || []}></Comments>
+          )}
+        </div>
       </div>
     </main>
   );
 };
 
-interface HeaderProps {
-  isLoading: boolean;
-  feedback: FeedbackWithUpVotesAndComments;
-  upvotes: UpVote[];
-  commentsNumber?: number;
-}
-
-const Header = ({
-  feedback,
-  commentsNumber,
-  isLoading,
-  upvotes,
-}: HeaderProps) => {
+const Header = () => {
   return (
     <>
       <div className="flex items-center justify-between w-full mb-9">
         <GoBack></GoBack>
         <Button color="dark-sky-blue">Edit Feedback</Button>
       </div>
-      <div>
-        {isLoading ? (
-          <FeedbackSummaryLoading></FeedbackSummaryLoading>
-        ) : (
-          <FeedbackSummary
-            feedback={feedback}
-            commentsNumber={commentsNumber}
-            myUpVotes={upvotes}
-          ></FeedbackSummary>
-        )}
-      </div>
     </>
+  );
+};
+
+interface CommentsFeedbackSummaryProps {
+  isFeedbackLoading: boolean;
+  feedback: FeedbackWithUpVotesAndComments;
+  upvotes: UpVote[];
+  commentsNumber: number;
+}
+
+const CommentsFeedbackSummary = ({
+  commentsNumber,
+  feedback,
+  isFeedbackLoading,
+  upvotes,
+}: CommentsFeedbackSummaryProps) => {
+  return (
+    <div>
+      {isFeedbackLoading ? (
+        <FeedbackSummaryLoading className="rounded-none"></FeedbackSummaryLoading>
+      ) : (
+        <FeedbackSummary
+          feedback={feedback}
+          commentsNumber={commentsNumber}
+          myUpVotes={upvotes}
+          className="rounded-none"
+        ></FeedbackSummary>
+      )}
+    </div>
   );
 };
 
 interface AddCommentProps {
   feedbackId: string;
+  onSubmitted?: () => void;
 }
 
-const AddComment = ({ feedbackId }: AddCommentProps) => {
+const AddComment = ({
+  feedbackId,
+  onSubmitted = () => {},
+}: AddCommentProps) => {
   type createCommentType = z.infer<typeof createCommentSchema>;
   const {
     register,
     formState: { errors },
+    clearErrors,
     handleSubmit,
-    watch,
     setValue,
     resetField,
   } = useForm<createCommentType>({
@@ -108,32 +137,46 @@ const AddComment = ({ feedbackId }: AddCommentProps) => {
     },
   });
 
-  const MAX_CHARS = 250;
+  const { mutate, status } = useCreateComment(feedbackId);
 
-  const { mutate } = useCreateComment(feedbackId);
-
-  const onSubmit = (data: createCommentType) => {
+  const onSubmit = async (data: createCommentType) => {
     mutate(data);
     resetField("content");
+    onSubmitted();
+  };
+
+  const handleCancel = async () => {
+    setValue("content", "");
+    clearErrors("content");
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="bg-white pt-6 px-8 pb-8 rounded-[10px] mt-2"
-    >
-      <h3 className="text-navy-blue h3 mb-6">Add Comment</h3>
-      <TextField
+    <div className="px-8">
+      <ExpandableTextField
+        isLoading={status == "pending"}
+        onSubmit={handleSubmit(onSubmit)}
+        onCancel={handleCancel}
+        placeholder="Add a comment"
+        actionLabel="Comment"
         textarea
-        placeholder="Type your comment here"
         errorMessage={errors.content?.message}
         {...register("content")}
-      ></TextField>
-      <div className="flex items-center justify-between mt-4 ">
-        <p>{MAX_CHARS - watch("content").length} Charachters left</p>
-        <Button color="violet">Comment</Button>
-      </div>
-    </form>
+      ></ExpandableTextField>
+    </div>
+  );
+};
+
+const AddCommentLoading = () => {
+  return (
+    <div className="px-8 py-2">
+      <LoadingSkeleton
+        height={64}
+        className="h-[64px]"
+        baseColor="#F2F4FE"
+        highlightColor="#F8F9FE"
+        borderRadius={99999}
+      ></LoadingSkeleton>
+    </div>
   );
 };
 
@@ -143,10 +186,15 @@ interface CommentProps {
 
 const Comments = ({ comments }: CommentProps) => {
   return (
-    <div className="bg-white pt-6 px-8 pb-12 rounded-[10px] mt-6">
-      <h3 className="text-navy-blue h3 mb-6">{comments.length} Comments</h3>
+    <div className="pt-6 px-8 pb-12">
+      <div className="mb-6">
+        <h3 className="text-navy-blue h3">{comments.length} Comments</h3>
+        {!comments.length ? (
+          <h3 className="text-navy-blue h3 mt-2">Be the first to comment</h3>
+        ) : null}
+      </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col">
         {comments.map((comment) => (
           <CommentSummary comment={comment} key={comment.id}></CommentSummary>
         ))}
@@ -155,79 +203,353 @@ const Comments = ({ comments }: CommentProps) => {
   );
 };
 
-interface CommentSummaryProps {
-  comment: CommentWithUserAndRepliesLength;
+interface CommentsLoadingProps {
+  count?: number;
 }
 
-export const CommentSummary = ({ comment }: CommentSummaryProps) => {
-  const [isReplying, setIsReplying] = useState(false);
+const CommentsLoading = ({ count = 3 }: CommentsLoadingProps) => {
+  const arr = new Array(count).fill(0);
 
   return (
-    <div className="relative flex gap-8 w-full items-start">
-      <CommentLeftBorder
-        repliesLength={comment.replies.length}
-        isReplying={isReplying}
-      ></CommentLeftBorder>
-      <Image
-        src={comment.user.image || ""}
-        alt={`${comment.user.name}'s image`}
-        width={40}
-        height={40}
-      />
-      <div className="flex flex-col w-full">
-        <div className="flex items-end justify-between mb-4">
-          <div className="flex gap-2">
-            <h4 className="h4 text-navy-blue">{comment.user.name}</h4>
-            <h4 className="h4 text-steel-blue fpont-normal">
-              {moment(comment.createdAt).fromNow()}
-            </h4>
-          </div>
-        </div>
-        <p className="body2 text-steel-blue mb-2">{comment.content}</p>
-        <CommentFooter onReply={() => setIsReplying(true)}></CommentFooter>
-        {isReplying ? (
-          <CommentReply
-            closeReply={() => setIsReplying(false)}
-            feedbackId={comment.feedbackId}
-            parentId={comment.id}
-          ></CommentReply>
-        ) : null}
+    <div className="pt-6 px-8 pb-12">
+      <LoadingSkeleton
+        width={150}
+        height={26}
+        borderRadius={5}
+        containerClassName="h-[26px] w-[150px]"
+        baseColor="#F2F4FE"
+        highlightColor="#F8F9FE"
+        className="mb-6"
+      ></LoadingSkeleton>
+      <div className="flex flex-col gap-4">
+        {arr.map((x, index) => (
+          <CommentSummaryLoading key={index}></CommentSummaryLoading>
+        ))}
       </div>
     </div>
   );
 };
 
-interface CommentLeftBorderProps {
-  repliesLength: number;
-  isReplying: boolean;
+interface RepliesLoadingProps {
+  count?: number;
 }
+const RepliesLoading = ({ count = 3 }: RepliesLoadingProps) => {
+  const arr = new Array(count).fill(0);
 
-const CommentLeftBorder = ({
-  repliesLength,
-  isReplying,
-}: CommentLeftBorderProps) => {
-  return repliesLength || isReplying ? (
-    <>
-      <div className="absolute bg-[#8C92B3]/25 w-[1px] top-[43px] left-[20px] bottom-[20px]">
-        <div className="relative size-full">
-          <div className="absolute top-[100%] left-0 -translate-x-1/2 p-2 -mt-2 hover:bg-steel-blue/10 rounded-full">
-            <button className="border-steel-blue border-solid border opacity-25 rounded-full size-4 flex items-center justify-center">
-              <Icon icon={PlusIcon} color="rgb(100,113,150)"></Icon>
-            </button>
+  return (
+    <div className="flex flex-col gap-4">
+      {arr.map((x, index) => (
+        <CommentSummaryLoading key={index}></CommentSummaryLoading>
+      ))}
+    </div>
+  );
+};
+
+const CommentSummaryLoading = () => {
+  return (
+    <div className="relative flex gap-8 w-full items-start">
+      <LoadingSkeleton
+        width={40}
+        height={40}
+        borderRadius={99999}
+        containerClassName="h-[40px] w-[40px]"
+        baseColor="#F2F4FE"
+        highlightColor="#F8F9FE"
+      ></LoadingSkeleton>
+
+      <div className="flex flex-col w-full">
+        <div className="relative flex flex-col w-full">
+          <div className="flex items-end justify-between mb-4">
+            <div className="flex gap-2">
+              <LoadingSkeleton
+                baseColor="#F2F4FE"
+                highlightColor="#F8F9FE"
+                width={80}
+                height={20}
+                containerClassName="h-[20px]"
+              ></LoadingSkeleton>
+            </div>
           </div>
         </div>
+        <LoadingSkeleton
+          baseColor="#F2F4FE"
+          highlightColor="#F8F9FE"
+          width={250}
+          height={10}
+          containerClassName="h-[10px]"
+        ></LoadingSkeleton>
+        <LoadingSkeleton
+          baseColor="#F2F4FE"
+          highlightColor="#F8F9FE"
+          width={250}
+          height={10}
+          containerClassName="h-[10px] mt-1"
+        ></LoadingSkeleton>
+        <div className="flex items-center gap-2 mt-2">
+          <LoadingSkeleton
+            baseColor="#F2F4FE"
+            highlightColor="#F8F9FE"
+            width={16}
+            height={16}
+            containerClassName="h-[16]"
+            borderRadius={4}
+          ></LoadingSkeleton>
+          <LoadingSkeleton
+            baseColor="#F2F4FE"
+            highlightColor="#F8F9FE"
+            width={50}
+            height={16}
+            containerClassName="h-[16]"
+            borderRadius={4}
+          ></LoadingSkeleton>
+          <LoadingSkeleton
+            baseColor="#F2F4FE"
+            highlightColor="#F8F9FE"
+            width={16}
+            height={16}
+            containerClassName="h-[16]"
+            borderRadius={4}
+          ></LoadingSkeleton>
+          <LoadingSkeleton
+            baseColor="#F2F4FE"
+            highlightColor="#F8F9FE"
+            width={60}
+            height={16}
+            containerClassName="h-[16]"
+            borderRadius={4}
+          ></LoadingSkeleton>
+        </div>
       </div>
-    </>
+    </div>
+  );
+};
+
+interface CommentSummaryProps {
+  comment: CommentWithUserAndRepliesLength;
+  index?: number;
+  isReply?: boolean;
+}
+
+export const CommentSummary = ({
+  comment,
+  index,
+  isReply,
+}: CommentSummaryProps) => {
+  const [isReplying, setIsReplying] = useState(false);
+  const [areRepliesExpanded, setAreRepliesExpanded] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const viewReplies = () => {
+    if (!queryClient.getQueryState(["comments", comment.id, "replies"])?.data)
+      queryClient.prefetchQuery({
+        queryKey: ["comments", comment.id, "replies"],
+      });
+  };
+
+  const toggleReplies = () => {
+    viewReplies();
+    setAreRepliesExpanded(!areRepliesExpanded);
+  };
+
+  const handleReply = () => {
+    setAreRepliesExpanded(true);
+    setIsReplying(false);
+  };
+
+  const isCreatingReply = () => {
+    return Boolean(
+      queryClient.isMutating({
+        mutationKey: ["comments", comment.id, "replies"],
+      })
+    );
+  };
+
+  return (
+    <div
+      className="relative flex gap-8 py-2 w-full items-start"
+      data-comment-id={comment.id}
+      data-index={index}
+    >
+      <CommentSummaryUserImage
+        userImage={comment.user.image}
+        userName={comment.user.name}
+        isReply={isReply}
+      ></CommentSummaryUserImage>
+      <div className="flex flex-col w-full">
+        <div className="relative flex flex-col w-full">
+          <CommentSummaryHeader
+            userName={comment.user.name}
+            createdAt={comment.createdAt}
+            haveReplies={Boolean(comment.replies.length)}
+            areRepliesExpanded={areRepliesExpanded}
+            onToggleReplies={toggleReplies}
+          ></CommentSummaryHeader>
+          <div className="relative flex flex-col w-full">
+            <p className="body2 text-steel-blue mb-2">{comment.content}</p>
+            <CommentFooter
+              onReplyClick={() => setIsReplying(true)}
+            ></CommentFooter>
+          </div>
+        </div>
+        <div className="flex flex-col w-full">
+          {isReplying || isCreatingReply() ? (
+            <CommentReply
+              onReply={handleReply}
+              closeReply={() => setIsReplying(false)}
+              feedbackId={comment.feedbackId}
+              parentId={comment.id}
+              leftBorder={comment.replies.length != 0}
+            ></CommentReply>
+          ) : null}
+          <CommentSummaryReplies
+            areRepliesExpanded={areRepliesExpanded}
+            commentId={comment.id}
+            isCreatingReply={isCreatingReply()}
+          ></CommentSummaryReplies>
+        </div>
+      </div>
+
+      {isReply ? <ReplyLeftBorder></ReplyLeftBorder> : null}
+    </div>
+  );
+};
+
+interface CommentSummaryRepliesProps {
+  commentId: string;
+  areRepliesExpanded: boolean;
+  isCreatingReply: boolean;
+}
+
+const CommentSummaryReplies = ({
+  commentId,
+  areRepliesExpanded,
+  isCreatingReply,
+}: CommentSummaryRepliesProps) => {
+  const { data: replies, fetchStatus: repliesFetchStatus } =
+    useGetReplies(commentId);
+
+  return repliesFetchStatus == "fetching" ? (
+    <RepliesLoading count={2}></RepliesLoading>
+  ) : areRepliesExpanded ? (
+    <div className="flex flex-col">
+      {isCreatingReply && replies?.length ? (
+        <div className="mb-2">
+          <CommentSummaryLoading></CommentSummaryLoading>
+        </div>
+      ) : null}
+      {replies?.map((reply, index) => (
+        <CommentSummary comment={reply} index={index} isReply></CommentSummary>
+      ))}
+    </div>
   ) : null;
 };
 
-interface CommentFooterProps {
-  onReply?: () => void;
+interface CommentSummaryHeaderProps {
+  createdAt: Date;
+  userName: string | null;
+  haveReplies: boolean;
+  onToggleReplies: () => void;
+  areRepliesExpanded: boolean;
 }
 
-const CommentFooter = ({ onReply }: CommentFooterProps) => {
+const CommentSummaryHeader = ({
+  userName,
+  createdAt,
+  haveReplies,
+  onToggleReplies,
+  areRepliesExpanded,
+}: CommentSummaryHeaderProps) => {
   return (
-    <div className="flex mb-2">
+    <div className="flex items-end justify-between mb-4">
+      <div className="flex gap-2">
+        <h4 className="h4 text-navy-blue">{userName}</h4>
+        <h4 className="h4 text-steel-blue fpont-normal">
+          {moment(createdAt).fromNow()}
+        </h4>
+      </div>
+      {haveReplies ? (
+        <CommentLeftBorder
+          onToggle={onToggleReplies}
+          areRepliesExpanded={areRepliesExpanded}
+        ></CommentLeftBorder>
+      ) : null}
+    </div>
+  );
+};
+
+interface CommentSummaryUserImageProps {
+  userImage: string | null;
+  userName: string | null;
+  isReply?: boolean;
+}
+
+const CommentSummaryUserImage = ({
+  userImage,
+  userName,
+  isReply,
+}: CommentSummaryUserImageProps) => {
+  return (
+    <div className="relative">
+      <Image
+        src={userImage || ""}
+        alt={`${userName}'s image`}
+        width={40}
+        height={40}
+      />
+      {isReply ? <ImageLeftBorder></ImageLeftBorder> : null}
+    </div>
+  );
+};
+
+interface CommentLeftBorderProps {
+  onToggle?: () => void;
+  areRepliesExpanded: boolean;
+}
+
+const CommentLeftBorder = ({
+  onToggle,
+  areRepliesExpanded,
+}: CommentLeftBorderProps) => {
+  return (
+    <div className="absolute left-[-52px] top-[44px] bottom-[17.5px] w-[1px] bg-[#8C92B3]/25">
+      <div className="relative size-full">
+        <div className="absolute top-[100%] left-0 -translate-x-1/2 p-2 -mt-2 hover:bg-steel-blue/10 rounded-full">
+          <button
+            onClick={onToggle}
+            className="rounded-full size-4 flex items-center justify-center"
+          >
+            {areRepliesExpanded ? (
+              <Icon icon={MinusCircleIcon} color="rgb(100,113,150,0.25)"></Icon>
+            ) : (
+              <Icon icon={PlusCircleIcon} color="rgb(100,113,150,0.25)"></Icon>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ImageLeftBorder = () => {
+  return (
+    <div className="absolute left-0 -translate-x-full top-1/2 w-[52px] h-[1px] bg-[#8C92B3]/25"></div>
+  );
+};
+
+const ReplyLeftBorder = () => {
+  return (
+    <div className="absolute left-[-52px] top-[-2px] bottom-[0px] w-[1px] bg-[#8C92B3]/25"></div>
+  );
+};
+
+interface CommentFooterProps {
+  onReplyClick?: () => void;
+}
+
+const CommentFooter = ({ onReplyClick: onReply }: CommentFooterProps) => {
+  return (
+    <div className="flex">
       <CommentVote></CommentVote>
       <button
         onClick={onReply}
@@ -257,23 +579,29 @@ const CommentVote = () => {
 };
 
 interface CommentReplyProps {
+  onReply: () => void;
   parentId: string;
   closeReply: () => void;
   feedbackId: string;
+  leftBorder: boolean;
 }
 
 const CommentReply = ({
+  onReply,
   parentId,
   closeReply,
   feedbackId,
+  leftBorder,
 }: CommentReplyProps) => {
-  const { mutate } = useCreateComment(feedbackId);
+  const { mutate, status } = useCreateReply(feedbackId, parentId);
 
   type createCommentType = z.infer<typeof createCommentSchema>;
   const {
     register,
     formState: { errors },
     handleSubmit,
+    setValue,
+    clearErrors,
   } = useForm<createCommentType>({
     resolver: zodResolver(createCommentSchema),
     defaultValues: {
@@ -286,26 +614,31 @@ const CommentReply = ({
   const onSubmit = (data: createCommentType) => {
     mutate(data);
     closeReply();
+    onReply();
+  };
+
+  const handleCancel = async () => {
+    setValue("content", "");
+    clearErrors("content");
+    closeReply();
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="relative flex flex-col gap-2 bg-cloud-white border border-[#8C92B3]/25 rounded-[10px] p-2"
-    >
-      <TextField
-        {...register("content")}
-        errorMessage={errors.content?.message}
+    <div className="relative py-2">
+      <ExpandableTextField
         autoFocus
         textarea
-      ></TextField>
-      <div className="w-full flex justify-end gap-2">
-        <Button onClick={closeReply} color="crimson">
-          Cancel
-        </Button>
-        <Button>Comment</Button>
-      </div>
-    </form>
+        isLoading={status == "pending"}
+        {...register("content")}
+        onSubmit={handleSubmit(onSubmit)}
+        onCancel={handleCancel}
+        errorMessage={errors.content?.message}
+        placeholder="Add a reply"
+      ></ExpandableTextField>
+      {leftBorder ? (
+        <div className="absolute left-[-52px] top-[-2px] bottom-0 w-[1px] bg-[#8C92B3]/25"></div>
+      ) : null}
+    </div>
   );
 };
 
