@@ -1,4 +1,4 @@
-import { Category, Feedback } from "@prisma/client";
+import { Category, Feedback, Status } from "@prisma/client";
 import Link from "next/link";
 import { useForm, UseFormReturn } from "react-hook-form";
 import Button from "./Button";
@@ -23,9 +23,14 @@ interface FeedbackFormProps {
 }
 
 const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
-  const options = Object.values(Category).map((category) => ({
+  const categories = Object.values(Category).map((category) => ({
     label: category,
     value: category,
+  }));
+
+  const statuses = Object.values(Status).map((status) => ({
+    label: status,
+    value: status,
   }));
 
   const {
@@ -41,7 +46,11 @@ const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
   });
 
   const getOptionFromCategory = (category: Category) => {
-    return options.find(({ value }) => value == category);
+    return categories.find(({ value }) => value == category);
+  };
+
+  const getOptionFromStatus = (status: Status) => {
+    return statuses.find(({ value }) => value == status);
   };
 
   return (
@@ -76,13 +85,32 @@ const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
             Choose a category for your feedback{" "}
           </p>
           <Dropdown
-            options={options}
+            options={categories}
             defaultOption={
-              feedback ? getOptionFromCategory(feedback?.category) : options[0]
+              feedback
+                ? getOptionFromCategory(feedback?.category)
+                : categories[0]
             }
             color="cloudy-white"
             onValueChange={({ value }) => {
               setValue("category", value);
+            }}
+            zIndex={6}
+          ></Dropdown>
+        </div>
+        <div>
+          <h4 className="h4 text-navy-blue mb-[2px]">Status</h4>
+          <p className="text-[14px] font-normal text-steel-blue mb-4">
+            Change feedback state
+          </p>
+          <Dropdown
+            options={statuses}
+            defaultOption={
+              feedback ? getOptionFromStatus(feedback?.status) : statuses[0]
+            }
+            color="cloudy-white"
+            onValueChange={({ value }) => {
+              setValue("status", value);
             }}
           ></Dropdown>
         </div>

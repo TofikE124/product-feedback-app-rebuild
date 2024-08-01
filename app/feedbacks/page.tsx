@@ -9,9 +9,12 @@ import Dropdown from "@/components/Dropdown";
 
 import FeedbackSummary from "@/components/FeedbackSummary";
 import FeedbackSummaryLoading from "@/components/FeedbackSummaryLoading";
+import { roadMapItemMap } from "@/constants/roadMap";
 import { useLoadFeedbacks as useGetFeedbacks } from "@/hooks/useGetFeedbacks";
 import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
 import { SortingDirection, SortingProperty } from "@/types/Sorting";
+import { getStatusCount } from "@/utils/getStatusCount";
+import { Category, Status } from "@prisma/client";
 import { useState } from "react";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
 import IllustrationEmpty from "/public/suggestions/illustration-empty.svg";
@@ -44,7 +47,7 @@ const FeedbacksEmpty = () => {
           Got a suggestion? Found a bug that needs to be squashed? We love
           hearing about new ideas to improve our app.
         </p>
-        <Link href="/new-feedback" className="block mt-6">
+        <Link href="/feedbacks/new-feedback" className="block mt-6">
           <Button className="w-fit">+ Add Feedback</Button>
         </Link>
       </div>
@@ -53,6 +56,8 @@ const FeedbacksEmpty = () => {
 };
 
 const SuggestionsToolbar = () => {
+  const { data: feedbacks } = useGetFeedbacks();
+
   return (
     <div className="w-full flex items-center gap-4 lgmd:p-6 sm:py-4 sm:px-6 bg-navy-blue lgmd:rounded-[10px]">
       <Image
@@ -60,9 +65,11 @@ const SuggestionsToolbar = () => {
         alt="Suggestions Icon"
         className="sm:hidden"
       ></Image>
-      <h3 className="h3 text-white sm:hidden ">6 Suggestions</h3>
+      <h3 className="h3 text-white sm:hidden">
+        {feedbacks?.length} {feedbacks?.length == 1 ? "Feedback" : "Feedbacks"}
+      </h3>
       <SortByDropdown></SortByDropdown>
-      <Link href="/new-feedback" className="block ml-auto">
+      <Link href="/feedbacks/new-feedback" className="block ml-auto">
         <Button>+ Add Feedback</Button>
       </Link>
     </div>
@@ -227,14 +234,7 @@ const SuggestionFilter = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const filters = [
-    { label: "All", value: null },
-    { label: "UI", value: "UI" },
-    { label: "UX", value: "UX" },
-    { label: "Enhancement", value: "Enhancement" },
-    { label: "Bug", value: "Bug" },
-    { label: "Feature", value: "Feature" },
-  ];
+  const categories = [null, ...Object.values(Category)];
 
   const handleLinkClick = (value: string | null) => {
     const newSearchParams = new URLSearchParams(searchParams);
@@ -249,13 +249,13 @@ const SuggestionFilter = () => {
   return (
     <div className="md:basis-full bg-white p-6 rounded-[10px]">
       <div className="flex flex-wrap gap-x-2 gap-y-[14px] items-center">
-        {filters.map(({ label, value }, index) => (
+        {categories.map((category, index) => (
           <FeedbackType
             onClick={() => {
-              handleLinkClick(value);
+              handleLinkClick(category);
             }}
-            text={label}
-            active={currentFilter == value}
+            category={category as Category}
+            active={currentFilter == category}
             key={index}
           ></FeedbackType>
         ))}
@@ -265,18 +265,26 @@ const SuggestionFilter = () => {
 };
 
 const RoadMap = () => {
+  const { data: feedbacks } = useGetFeedbacks();
+  const statuses = Object.values(Status);
+
   return (
     <div className="md:basis-full p-6 rounded-[10px] bg-white">
       <div className="flex items-center justify-between">
         <h3 className="h3 text-navy-blue">Roadmap</h3>
-        <Link href="/" className="text-dark-sky-blue body3 underline">
+        <Link href="/roadmap" className="text-dark-sky-blue body3 underline">
           View
         </Link>
       </div>
       <div className="mt-6 flex flex-col gap-2">
-        <StatusItem color="#000" label="Planned" count={1}></StatusItem>
-        <StatusItem color="#000" label="Planned" count={1}></StatusItem>
-        <StatusItem color="#000" label="Planned" count={1}></StatusItem>
+        {statuses.map((status, index) => (
+          <StatusItem
+            color={roadMapItemMap[status].color}
+            label={roadMapItemMap[status].label}
+            count={getStatusCount(status, feedbacks || [])}
+            key={index}
+          ></StatusItem>
+        ))}
       </div>
     </div>
   );

@@ -20,33 +20,11 @@ interface FeedbackSummaryProps {
 }
 
 const FeedbackSummary = memo(
-  ({
-    feedback,
-    myUpVotes,
-    commentsNumber,
-    to,
-    className,
-  }: FeedbackSummaryProps) => {
+  ({ feedback, commentsNumber, to, className }: FeedbackSummaryProps) => {
     const { data } = useGetFeedbackId(feedback.id, feedback);
     const ref = useRef<HTMLDivElement>(null);
 
     const router = useRouter();
-
-    const isUpvoted = () =>
-      myUpVotes.some((vote) => vote.feedbackId == feedback.id);
-
-    const { mutate: handleUpVote, isPending: isUpVoting } = useUpvote(
-      feedback.id
-    );
-
-    const { mutate: handleRemoveUpvote, isPending: isRemovingUpVoting } =
-      useRemoveUpvote(feedback.id);
-
-    const handleUpvoteClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (isUpvoted()) handleRemoveUpvote();
-      else handleUpVote();
-    };
 
     const handleCategoryClick = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -69,11 +47,7 @@ const FeedbackSummary = memo(
       >
         <div className="relative grid z-[2] lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
           <div className="lgmd:col-start-1 sm:row-start-2">
-            <UpVoteButton
-              votes={data?.upVotes.length || 0}
-              active={isUpvoted()}
-              onClick={handleUpvoteClick}
-            ></UpVoteButton>
+            <UpVoteButton feedbackId={feedback.id}></UpVoteButton>
           </div>
           <div className="lgmd:col-start-2 flex flex-col">
             <h3 className="h3 text-navy-blue lgmd:mb-1 sm:mb-2">
@@ -83,7 +57,7 @@ const FeedbackSummary = memo(
               {data?.description}
             </p>
             <FeedbackType
-              text={data?.category || ""}
+              category={data?.category!}
               onClick={handleCategoryClick}
             ></FeedbackType>
           </div>

@@ -1,16 +1,20 @@
+import { categoriesMap } from "@/constants/categories";
+import { Category } from "@prisma/client";
 import React from "react";
 
 interface FeedbackTypeProps {
-  text: string;
+  category: Category;
   active?: boolean;
   onClick?: (e: React.MouseEvent) => void;
 }
 
 const FeedbackType = ({
-  text,
+  category,
   active = false,
   onClick = () => {},
 }: FeedbackTypeProps) => {
+  const categoryItem = categoriesMap[category];
+
   return (
     <div
       onClick={onClick}
@@ -19,7 +23,7 @@ const FeedbackType = ({
       }`}
     >
       <p className={`body3 ${active ? "text-white" : "text-dark-sky-blue"}`}>
-        {text}
+        {categoryItem?.label || "All"}
       </p>
     </div>
   );

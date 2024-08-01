@@ -453,7 +453,7 @@ const CommentSummaryReplies = ({
     useGetReplies(commentId);
 
   return repliesFetchStatus == "fetching" ? (
-    <RepliesLoading count={2}></RepliesLoading>
+    <RepliesLoading count={1}></RepliesLoading>
   ) : areRepliesExpanded ? (
     <div className="flex flex-col">
       {isCreatingReply && replies?.length ? (

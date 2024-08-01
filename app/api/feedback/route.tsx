@@ -1,16 +1,13 @@
 import prisma from "@/prisma/client";
 import { feedbackSchema } from "@/schemas/feedbackSchema";
 import { SortingDirection, SortingProperty } from "@/types/Sorting";
-import { delay } from "@/utils/delay";
-import { Category, Feedback, Prisma } from "@prisma/client";
+import { Category, Feedback, Prisma, Status } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-
-  await delay(1000);
 
   const session = await getServerSession();
   if (!session?.user)
@@ -83,13 +80,14 @@ export async function POST(request: NextRequest) {
       { status: 401 }
     );
 
-  const { category, description, title } = body;
+  const { category, description, title, status } = body;
 
   const feedback = await prisma.feedback.create({
     data: {
       title,
       description,
       category: category as Category,
+      status: status as Status,
       userId: user.id,
     },
   });

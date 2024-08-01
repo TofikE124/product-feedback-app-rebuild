@@ -1,6 +1,5 @@
 import prisma from "@/prisma/client";
 import { commentVoteSchema } from "@/schemas/commentVoteSchema";
-import { delay } from "@/utils/delay";
 import { VoteType } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";

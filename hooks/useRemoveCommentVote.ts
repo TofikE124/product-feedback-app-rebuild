@@ -1,6 +1,7 @@
 import { CommentVote, VoteType } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosRequestConfig, CancelTokenSource } from "axios";
+import toast from "react-hot-toast";
 
 export const useRemoveCommentVote = (commentId: string) => {
   const queryClient = useQueryClient();
@@ -50,6 +51,7 @@ export const useRemoveCommentVote = (commentId: string) => {
         votes: context?.oldVotes,
         voteType: null,
       });
+      toast.error("Error removing vote");
     },
     onSettled: () => {
       queryClient.invalidateQueries({

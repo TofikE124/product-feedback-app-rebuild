@@ -1,5 +1,4 @@
 import prisma from "@/prisma/client";
-import { delay } from "@/utils/delay";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 

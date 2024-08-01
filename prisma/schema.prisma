@@ -96,12 +96,19 @@ enum Category {
   Feature
 }
 
+enum Status {
+  Planned
+  InProgress
+  Live
+}
+
 
 model Feedback{
   id String @id @default(cuid())
   title String
   description String
   category  Category
+  status Status
 
   user      User        @relation(fields: [userId], references: [id],onDelete: Cascade)   
   userId    String
@@ -141,10 +148,10 @@ enum VoteType {
 model CommentVote {
   id          String      @id @default(cuid())
   voteType  VoteType
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id],onDelete:Cascade)
   userId    String
 
-  comment Comment @relation(fields: [commentId],references: [id])
+  comment Comment @relation(fields: [commentId],references: [id],onDelete:Cascade)
   commentId String
   
 

@@ -1,7 +1,6 @@
 import prisma from "@/prisma/client";
 import { feedbackSchema } from "@/schemas/feedbackSchema";
-import { delay } from "@/utils/delay";
-import { Category } from "@prisma/client";
+import { Category, Status } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -11,8 +10,6 @@ interface Props {
 }
 
 export async function GET(request: NextRequest, { params: { id } }: Props) {
-  await delay(1000);
-
   const session = await getServerSession();
   if (!session?.user)
     return NextResponse.json(
@@ -73,7 +70,11 @@ export async function PATCH(request: NextRequest, { params: { id } }: Props) {
 
   const editedFeedback = await prisma.feedback.update({
     where: { id },
-    data: { ...body, category: body.category as Category },
+    data: {
+      ...body,
+      category: body.category as Category,
+      status: body.status as Status,
+    },
   });
 
   return NextResponse.json(editedFeedback, { status: 200 });

@@ -44,6 +44,7 @@ type DropdownProps = {
   dropdownToggleLabel?: string;
   defaultMessage?: string;
   onValueChange?: (value: Option) => void;
+  zIndex?: number;
 } & dropdownToggleVariantProps;
 
 const Dropdown = ({
@@ -53,6 +54,7 @@ const Dropdown = ({
   color,
   defaultMessage,
   onValueChange = () => {},
+  zIndex = 5,
 }: DropdownProps) => {
   const [selectedOption, setSelectedOption] = useState(defaultOption || null);
   const [toggled, setToggled] = useState(false);
@@ -80,7 +82,7 @@ const Dropdown = ({
   }, [ref]);
 
   return (
-    <div className="relative z-[5]" ref={ref}>
+    <div className="relative" style={{ zIndex }} ref={ref}>
       <DropdownToggle
         dropdownToggleLabel={dropdownToggleLabel}
         defaultMessage={defaultMessage}
@@ -169,7 +171,7 @@ const DropdownMenu = ({
           animate={{ opacity: 100, translateY: "0px" }}
           exit={{ opacity: 0, translateY: "-15px" }}
           transition={{ duration: 0.2 }}
-          className="absolute mt-2 w-[255px] overflow-hidden rounded-[10px] bg-white shadow-[0px_10px_40px_-7px_rgba(55,63,104,0.35)]"
+          className="absolute mt-2 w-[255px] overflow-hidden rounded-[10px] bg-white shadow-[0px_10px_40px_-7px_rgba(55,63,104,0.35)] z-10"
         >
           {options.map((option, index) => (
             <div
