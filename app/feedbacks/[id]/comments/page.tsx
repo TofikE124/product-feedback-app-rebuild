@@ -194,8 +194,6 @@ const AddCommentLoading = () => {
       <LoadingSkeleton
         height={64}
         className="h-[64px]"
-        baseColor="#F2F4FE"
-        highlightColor="#F8F9FE"
         borderRadius={99999}
       ></LoadingSkeleton>
     </div>
@@ -239,8 +237,6 @@ const CommentsLoading = ({ count = 3 }: CommentsLoadingProps) => {
         height={26}
         borderRadius={5}
         containerClassName="h-[26px] w-[150px]"
-        baseColor="#F2F4FE"
-        highlightColor="#F8F9FE"
         className="mb-6"
       ></LoadingSkeleton>
       <div className="flex flex-col gap-4">
@@ -275,8 +271,6 @@ const CommentSummaryLoading = () => {
         height={40}
         borderRadius={99999}
         containerClassName="h-[40px] w-[40px]"
-        baseColor="#F2F4FE"
-        highlightColor="#F8F9FE"
       ></LoadingSkeleton>
 
       <div className="flex flex-col w-full">
@@ -284,8 +278,6 @@ const CommentSummaryLoading = () => {
           <div className="flex items-end justify-between mb-4">
             <div className="flex gap-2">
               <LoadingSkeleton
-                baseColor="#F2F4FE"
-                highlightColor="#F8F9FE"
                 width={80}
                 height={20}
                 containerClassName="h-[20px]"
@@ -294,47 +286,35 @@ const CommentSummaryLoading = () => {
           </div>
         </div>
         <LoadingSkeleton
-          baseColor="#F2F4FE"
-          highlightColor="#F8F9FE"
           width={250}
           height={10}
           containerClassName="h-[10px]"
         ></LoadingSkeleton>
         <LoadingSkeleton
-          baseColor="#F2F4FE"
-          highlightColor="#F8F9FE"
           width={250}
           height={10}
           containerClassName="h-[10px] mt-1"
         ></LoadingSkeleton>
         <div className="flex items-center gap-2 mt-2">
           <LoadingSkeleton
-            baseColor="#F2F4FE"
-            highlightColor="#F8F9FE"
             width={16}
             height={16}
             containerClassName="h-[16]"
             borderRadius={4}
           ></LoadingSkeleton>
           <LoadingSkeleton
-            baseColor="#F2F4FE"
-            highlightColor="#F8F9FE"
             width={50}
             height={16}
             containerClassName="h-[16]"
             borderRadius={4}
           ></LoadingSkeleton>
           <LoadingSkeleton
-            baseColor="#F2F4FE"
-            highlightColor="#F8F9FE"
             width={16}
             height={16}
             containerClassName="h-[16]"
             borderRadius={4}
           ></LoadingSkeleton>
           <LoadingSkeleton
-            baseColor="#F2F4FE"
-            highlightColor="#F8F9FE"
             width={60}
             height={16}
             containerClassName="h-[16]"

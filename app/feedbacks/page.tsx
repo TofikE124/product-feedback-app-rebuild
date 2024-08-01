@@ -17,7 +17,7 @@ import { getStatusCount } from "@/utils/getStatusCount";
 import { Category, Status } from "@prisma/client";
 import { useState } from "react";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
-import IllustrationEmpty from "/public/suggestions/illustration-empty.svg";
+import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
 
 export default function Home() {
   return (
@@ -32,28 +32,6 @@ export default function Home() {
     </main>
   );
 }
-
-const FeedbacksEmpty = () => {
-  return (
-    <div className="w-full h-full bg-white rounded-[10px] lg:py-[110px] md:py-[90px] sm:py-[76px] grid place-items-center">
-      <div className="max-w-[400px] text-center flex flex-col items-center">
-        <Image
-          className="mb-[50px]"
-          src={IllustrationEmpty}
-          alt="Illustration Empty"
-        ></Image>
-        <h1 className="h1 text-navy-blue">There is no feedback yet.</h1>
-        <p className="body1 text-steel-blue mt-4">
-          Got a suggestion? Found a bug that needs to be squashed? We love
-          hearing about new ideas to improve our app.
-        </p>
-        <Link href="/feedbacks/new-feedback" className="block mt-6">
-          <Button className="w-fit">+ Add Feedback</Button>
-        </Link>
-      </div>
-    </div>
-  );
-};
 
 const SuggestionsToolbar = () => {
   const { data: feedbacks } = useGetFeedbacks();

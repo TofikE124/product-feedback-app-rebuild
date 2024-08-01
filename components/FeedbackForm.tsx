@@ -13,6 +13,7 @@ import EditFeedbackIcon from "/public/shared/icon-edit-feedback.svg";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FeedbackFormLoading from "./FeedbackFormLoading";
+import { useRouter } from "next/navigation";
 
 type feedbackType = z.infer<typeof feedbackSchema>;
 
@@ -23,6 +24,8 @@ interface FeedbackFormProps {
 }
 
 const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
+  const router = useRouter();
+
   const categories = Object.values(Category).map((category) => ({
     label: category,
     value: category,
@@ -128,15 +131,14 @@ const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
         </div>
       </div>
       <div className="flex sm:flex-col gap-4 justify-end lgmd:mt-8 sm:mt-10">
-        <Link href="..">
-          <Button
-            type="button"
-            color="navy-blue"
-            className="sm:w-full sm:order-1"
-          >
-            Cancel
-          </Button>
-        </Link>
+        <Button
+          onClick={() => router.back()}
+          type="button"
+          color="navy-blue"
+          className="sm:w-full sm:order-1"
+        >
+          Cancel
+        </Button>
         <Button className="sm:w-full" disabled={isPending}>
           {feedback
             ? isPending

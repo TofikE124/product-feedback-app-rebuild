@@ -12,6 +12,8 @@ import Link from "next/link";
 import CommentsIcon from "/public/shared/icon-comments.svg";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
 
 const page = () => {
   return (
@@ -39,14 +41,11 @@ const Header = () => {
 };
 
 const RoadMapMain = () => {
-  const { data: feedbacks } = useLoadFeedbacks();
+  const { data: feedbacks, fetchStatus: feedbackFetchStatus } =
+    useLoadFeedbacks();
   const { data: myUpvotes } = useGetUserUpvotes();
   const statuses = Object.values(Status);
   const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    console.log(activeIndex);
-  }, [activeIndex]);
 
   return (
     <div className="relative lgmd:mt-12 md:mt-8 overflow-hidden">
@@ -63,7 +62,6 @@ const RoadMapMain = () => {
           <StatusItem
             status={status}
             feedbacks={getFeedbacksByStatus(feedbacks || [], status)}
-            myUpvotes={myUpvotes}
             key={index}
           ></StatusItem>
         ))}
@@ -113,13 +111,16 @@ const MobileStatusNavigationItem = ({
   status,
   onClick,
 }: MobileStatusNavigationItemProps) => {
-  const { data: feedbacks } = useLoadFeedbacks();
+  const { data: feedbacks, fetchStatus } = useLoadFeedbacks();
   const { label } = roadMapItemMap[status];
 
   return (
     <div className="py-5 text-center grow cursor-pointer" onClick={onClick}>
       <p className="text-navy-blue/40 border-y-red-300 font-bold">
-        {label} ({getFeedbacksByStatus(feedbacks || [], status).length})
+        {label}{" "}
+        {fetchStatus == "fetching"
+          ? ""
+          : `(${getFeedbacksByStatus(feedbacks || [], status).length})`}
       </p>
     </div>
   );
@@ -127,30 +128,51 @@ const MobileStatusNavigationItem = ({
 
 interface StatusItemProps {
   feedbacks: FeedbackWith_UpVotes_Comments[];
-  myUpvotes: UpVote[];
   status: Status;
 }
 
-const StatusItem = ({ feedbacks, myUpvotes, status }: StatusItemProps) => {
+const StatusItem = ({ feedbacks, status }: StatusItemProps) => {
+  const { fetchStatus } = useLoadFeedbacks();
   const { color, description, label } = roadMapItemMap[status];
 
   return (
     <div className="flex flex-col gap-8 grow sm:px-6 sm:w-screen">
       <div>
         <h3 className="h3 text-navy-blue">
-          {label} ({feedbacks.length})
+          {label} {fetchStatus == "fetching" ? "" : `(${feedbacks.length})`}
         </h3>
         <p className="text-steel-blue body1">{description}</p>
       </div>
-      <div className="flex flex-col lg:gap-6 mdsm:gap-4">
-        {feedbacks.map((feedback) => (
-          <RoadmapFeedbackSummary
-            feedback={feedback}
-            status={status}
-            key={feedback.id}
-          ></RoadmapFeedbackSummary>
-        ))}
-      </div>
+      {fetchStatus == "fetching" ? (
+        <FeedbacksLoading status={status}></FeedbacksLoading>
+      ) : (
+        <div className="flex flex-col lg:gap-6 mdsm:gap-4">
+          {feedbacks.length ? (
+            feedbacks.map((feedback) => (
+              <RoadmapFeedbackSummary
+                feedback={feedback}
+                status={status}
+                key={feedback.id}
+              ></RoadmapFeedbackSummary>
+            ))
+          ) : (
+            <FeedbacksEmpty></FeedbacksEmpty>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FeedbacksLoading = ({ status }: { status: Status }) => {
+  return (
+    <div className="flex flex-col lg:gap-6 mdsm:gap-4">
+      <RoadmapFeedbackSummaryLoading
+        status={status}
+      ></RoadmapFeedbackSummaryLoading>
+      <RoadmapFeedbackSummaryLoading
+        status={status}
+      ></RoadmapFeedbackSummaryLoading>
     </div>
   );
 };
@@ -193,6 +215,65 @@ const RoadmapFeedbackSummary = ({
             {feedback.comments.length}
           </p>
         </div>
+      </div>
+    </div>
+  );
+};
+
+interface RoadmapFeedbackSummaryLoadingProps {
+  status: Status;
+}
+
+const RoadmapFeedbackSummaryLoading = ({
+  status,
+}: RoadmapFeedbackSummaryLoadingProps) => {
+  const { color, label } = roadMapItemMap[status];
+
+  return (
+    <div
+      className="bg-white lg:p-8 md:px-5 md:py-6 sm:p-6 rounded-[5px] border-t-[6px] border-solid"
+      style={{ borderColor: color }}
+    >
+      <div className="flex items-center gap-4 lg:mb-2 mdsm:mb-4">
+        <LoadingSkeleton
+          width={80}
+          height={25}
+          className="h-[25px]"
+        ></LoadingSkeleton>
+      </div>
+      <div className="flex flex-col lg:gap-1 mdsm:gap-2 lg:mb-4 md:mb-6 sm:mb-2">
+        <LoadingSkeleton
+          width={150}
+          height={40}
+          className="h-[40px]"
+        ></LoadingSkeleton>
+        <LoadingSkeleton
+          width={250}
+          height={25}
+          className="h-[25px]"
+        ></LoadingSkeleton>
+      </div>
+      <div className="mb-4">
+        <LoadingSkeleton
+          width={80}
+          height={30}
+          className="h-[30px]"
+          borderRadius={10}
+        ></LoadingSkeleton>
+      </div>
+      <div className="flex items-center justify-between w-full">
+        <LoadingSkeleton
+          width={70}
+          height={40}
+          className="h-[40px]"
+          borderRadius={10}
+        ></LoadingSkeleton>
+        <LoadingSkeleton
+          width={50}
+          height={40}
+          className="h-[40px]"
+          borderRadius={10}
+        ></LoadingSkeleton>
       </div>
     </div>
   );
