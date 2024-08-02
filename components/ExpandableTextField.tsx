@@ -1,11 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ComponentProps, FormEvent, forwardRef, useState } from "react";
 import Button from "./Button";
-import Image from "next/image";
 
-import WarningIcon from "/public/shared/icon-warning.svg";
 import Icon from "./Icon";
-import { text } from "stream/consumers";
+import WarningIcon from "/public/shared/icon-warning.svg";
 
 type ExpandableTextFieldProps = {
   textarea?: boolean;
@@ -172,4 +170,6 @@ const ExpandableTextFieldButtons = ({
   );
 };
 
+ExpandableTextFieldMain.displayName = "ExpandableTextFieldMain";
+ExpandableTextField.displayName = "ExpandableTextField";
 export default ExpandableTextField;

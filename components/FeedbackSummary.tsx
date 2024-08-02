@@ -73,4 +73,5 @@ const FeedbackSummary = memo(
   }
 );
 
+FeedbackSummary.displayName = "FeedbackSummary";
 export default FeedbackSummary;

@@ -16,17 +16,7 @@ interface Props {
 
 type feedbackType = z.infer<typeof feedbackSchema>;
 
-const page = ({ params: { id } }: Props) => {
-  const { data: isOwn, fetchStatus: isOwnFetchStatus } = useIsOwnFeedback(id);
-
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isOwnFetchStatus == "idle" && !isOwn) {
-      router.push("/");
-    }
-  }, [isOwn]);
-
+const Page = ({ params: { id } }: Props) => {
   return (
     <div className="w-full min-h-screen bg-cloud-white lg:py-[92px] md:py-14 sm:py-[34px] grid">
       <div className="justify-self-center px-6 lgmd:w-[640px]">
@@ -42,6 +32,17 @@ interface EditFeedbackFormProps {
 }
 
 const EditFeedbackForm = ({ feedbackId }: EditFeedbackFormProps) => {
+  const { data: isOwn, fetchStatus: isOwnFetchStatus } =
+    useIsOwnFeedback(feedbackId);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isOwnFetchStatus == "idle" && !isOwn) {
+      router.push("/");
+    }
+  }, [isOwn]);
+
   const { data: feedback, fetchStatus: feedbackFetchStatus } =
     useGetFeedbackId(feedbackId);
 
@@ -62,4 +63,4 @@ const EditFeedbackForm = ({ feedbackId }: EditFeedbackFormProps) => {
   );
 };
 
-export default page;
+export default Page;

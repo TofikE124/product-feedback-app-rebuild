@@ -43,7 +43,7 @@ interface Props {
   params: { id: string };
 }
 
-const page = ({ params: { id } }: Props) => {
+const Page = ({ params: { id } }: Props) => {
   const { data: feedback, isLoading: isFeedbackLoading } = useGetFeedbackId(id);
   const { data: upvotes } = useGetUserUpvotes();
   const { data: comments, isLoading: isCommentsLoading } = useGetComments(id);
@@ -338,7 +338,7 @@ interface CommentSummaryProps {
   isLast?: boolean;
 }
 
-export const CommentSummary = ({
+const CommentSummary = ({
   comment,
   index,
   isReply,
@@ -454,6 +454,7 @@ const CommentSummaryReplies = ({
           index={index}
           isReply
           isLast={index == replies.length - 1}
+          key={index}
         ></CommentSummary>
       ))}
     </div>
@@ -695,4 +696,4 @@ const CommentReply = ({
   );
 };
 
-export default page;
+export default Page;

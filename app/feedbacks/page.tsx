@@ -15,7 +15,7 @@ import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
 import { SortingDirection, SortingProperty } from "@/types/Sorting";
 import { getStatusCount } from "@/utils/getStatusCount";
 import { Category, Status } from "@prisma/client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
 import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
 
@@ -26,8 +26,12 @@ export default function Home() {
         <SuggestionsControls></SuggestionsControls>
       </div>
       <div className="flex flex-col gap-6 w-full h-full">
-        <SuggestionsToolbar></SuggestionsToolbar>
-        <Feedbacks></Feedbacks>
+        <Suspense>
+          <SuggestionsToolbar></SuggestionsToolbar>
+        </Suspense>
+        <Suspense>
+          <Feedbacks></Feedbacks>
+        </Suspense>
       </div>
     </main>
   );
@@ -195,8 +199,12 @@ const SuggestionsMenu = ({ isOpened, onClose }: SuggestionsMenuProps) => {
           isOpened ? "sm:translate-x-0" : "sm:translate-x-full"
         }`}
       >
-        <SuggestionFilter></SuggestionFilter>
-        <RoadMap></RoadMap>
+        <Suspense>
+          <SuggestionFilter></SuggestionFilter>
+        </Suspense>
+        <Suspense>
+          <RoadMap></RoadMap>
+        </Suspense>
       </div>
       <div
         onClick={onClose}

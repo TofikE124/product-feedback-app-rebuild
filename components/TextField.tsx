@@ -82,4 +82,6 @@ const TextFieldErrorMessage = ({
   );
 };
 
+TextFieldMain.displayName = "TextFieldMain";
+TextField.displayName = "TextFeild";
 export default TextField;

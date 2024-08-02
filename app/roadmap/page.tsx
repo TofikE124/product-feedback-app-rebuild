@@ -1,26 +1,27 @@
 "use client";
 import Button from "@/components/Button";
 import FeedbackType from "@/components/FeedbackType";
+import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
 import GoBack from "@/components/GoBack";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import UpVoteButton from "@/components/UpVote";
 import { roadMapItemMap } from "@/constants/roadMap";
 import { useLoadFeedbacks } from "@/hooks/useGetFeedbacks";
-import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
 import { FeedbackWith_UpVotes_Comments } from "@/types/Feedback";
-import { Status, UpVote } from "@prisma/client";
-import Link from "next/link";
-import CommentsIcon from "/public/shared/icon-comments.svg";
+import { Status } from "@prisma/client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import LoadingSkeleton from "@/components/LoadingSkeleton";
-import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import CommentsIcon from "/public/shared/icon-comments.svg";
 
 const page = () => {
   return (
     <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen lg:py-[94px] md:pt-[94px] md:pb-[40px] sm:pb-[50px] ">
       <Header></Header>
-      <RoadMapMain></RoadMapMain>
+      <Suspense>
+        <RoadMapMain></RoadMapMain>
+      </Suspense>
     </main>
   );
 };
@@ -58,11 +59,12 @@ const RoadMapMain = () => {
         style={{ transform: `translate(${-100 * activeIndex}vw, 0)` }}
       >
         {statuses.map((status, index) => (
-          <StatusItem
-            status={status}
-            feedbacks={getFeedbacksByStatus(feedbacks || [], status)}
-            key={index}
-          ></StatusItem>
+          <Suspense key={index}>
+            <StatusItem
+              status={status}
+              feedbacks={getFeedbacksByStatus(feedbacks || [], status)}
+            ></StatusItem>
+          </Suspense>
         ))}
       </div>
     </div>
@@ -91,11 +93,12 @@ const MobileStatusNavigation = ({
         style={{ backgroundColor: color, left: `${(100 / 3) * activeIndex}%` }}
       ></div>
       {statuses.map((status, index) => (
-        <MobileStatusNavigationItem
-          onClick={() => onItemClick(index)}
-          status={status}
-          key={index}
-        ></MobileStatusNavigationItem>
+        <Suspense key={index}>
+          <MobileStatusNavigationItem
+            onClick={() => onItemClick(index)}
+            status={status}
+          ></MobileStatusNavigationItem>
+        </Suspense>
       ))}
     </div>
   );
