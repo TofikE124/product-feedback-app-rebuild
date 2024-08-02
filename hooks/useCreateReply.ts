@@ -18,11 +18,11 @@ export const useCreateReply = (feedbackId: string, commentId: string) => {
       console.log(error);
     },
     onSettled: (data, error) => {
+      queryClient.invalidateQueries({
+        queryKey: ["feedbacks", feedbackId],
+      });
       queryClient.prefetchQuery({
         queryKey: ["comments", commentId, "replies"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["feedbacks", feedbackId, "comments"],
       });
     },
   });

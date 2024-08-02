@@ -45,7 +45,7 @@ const FeedbackSummary = memo(
           className
         )}
       >
-        <div className="relative grid z-[2] lgmd:grid-cols-[max-content,max-content,1fr] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
+        <div className="relative grid z-[2] lgmd:grid-cols-[max-content,1fr,max-content] lgmd:gap-10 sm:grid-cols-2 sm:gap-y-4">
           <div className="lgmd:col-start-1 sm:row-start-2">
             <UpVoteButton feedbackId={feedback.id}></UpVoteButton>
           </div>
@@ -53,7 +53,7 @@ const FeedbackSummary = memo(
             <h3 className="h3 text-navy-blue lgmd:mb-1 sm:mb-2">
               {data?.title}
             </h3>
-            <p className="body1 text-steel-blue lgmd:mb-3 sm:mb-2">
+            <p className="body1 text-wrap text-steel-blue lgmd:mb-3 sm:mb-2">
               {data?.description}
             </p>
             <FeedbackType
@@ -64,7 +64,7 @@ const FeedbackSummary = memo(
           <div className="lgmd:col-start-3 sm:row-start-2 flex items-center gap-2 ml-auto self-center">
             <Image src={CommentsIcon} alt="Comments Icon" />
             <p className="body1 text-navy-blue font-bold">
-              {commentsNumber ?? data?.comments.length}
+              {data?.comments.length}
             </p>
           </div>
         </div>

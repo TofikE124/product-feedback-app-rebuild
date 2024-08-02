@@ -67,7 +67,7 @@ const page = ({ params: { id } }: Props) => {
           {isCommentsLoading ? (
             <CommentsLoading></CommentsLoading>
           ) : (
-            <Comments comments={comments || []}></Comments>
+            <Comments comments={comments || []} feedbackId={id}></Comments>
           )}
         </div>
       </div>
@@ -202,13 +202,18 @@ const AddCommentLoading = () => {
 
 interface CommentProps {
   comments: CommentWith_User_RepliesLength[];
+  feedbackId: string;
 }
 
-const Comments = ({ comments }: CommentProps) => {
+const Comments = ({ comments, feedbackId }: CommentProps) => {
+  const { data: feedback } = useGetFeedbackId(feedbackId);
+
   return (
     <div className="pt-6 px-8 pb-12">
       <div className="mb-6">
-        <h3 className="text-navy-blue h3">{comments.length} Comments</h3>
+        <h3 className="text-navy-blue h3">
+          {feedback?.comments.length} Comments
+        </h3>
         {!comments.length ? (
           <h3 className="text-navy-blue h3 mt-2">Be the first to comment</h3>
         ) : null}
@@ -341,6 +346,7 @@ export const CommentSummary = ({
 }: CommentSummaryProps) => {
   const [isReplying, setIsReplying] = useState(false);
   const [areRepliesExpanded, setAreRepliesExpanded] = useState(false);
+  const { data: replies } = useGetReplies(comment.id);
 
   const queryClient = useQueryClient();
 
@@ -385,7 +391,7 @@ export const CommentSummary = ({
           <CommentSummaryHeader
             userName={comment.user.name}
             createdAt={comment.createdAt}
-            haveReplies={Boolean(comment.replies.length)}
+            haveReplies={Boolean(comment.replies.length || replies?.length)}
             areRepliesExpanded={areRepliesExpanded}
             onToggleReplies={toggleReplies}
           ></CommentSummaryHeader>
@@ -505,7 +511,7 @@ const CommentSummaryUserImage = ({
         alt={`${userName}'s image`}
         width={40}
         height={40}
-        className="rounded-full"
+        className="rounded-full size-10 object-cover"
       />
       {isReply ? <ImageLeftBorder></ImageLeftBorder> : null}
     </div>
@@ -543,7 +549,7 @@ const CommentLeftBorder = ({
 
 const ImageLeftBorder = () => {
   return (
-    <div className="absolute left-0 -translate-x-full -translate-y-full top-1/2 w-[52px] h-[26px] rounded-bl-3xl  border-[#8C92B3]/25 border-solid border-[1px] border-t-0 border-r-0"></div>
+    <div className="absolute left-0 -translate-x-full -translate-y-full top-1/2 w-[52px] h-[30px] rounded-bl-3xl  border-[#8C92B3]/25 border-solid border-[1px] border-t-0 border-r-0"></div>
   );
 };
 

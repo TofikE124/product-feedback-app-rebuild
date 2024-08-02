@@ -12,7 +12,7 @@ export const useCreateComment = (feedbackId: string) => {
     onError: () => {},
     onSettled: (data, error, { parentId }) => {
       queryClient.invalidateQueries({
-        queryKey: ["feedbacks", feedbackId, "comments"],
+        queryKey: ["feedbacks", feedbackId],
       });
     },
   });

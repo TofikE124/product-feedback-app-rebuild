@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
+import { useRouter } from "next/navigation";
 
 const page = () => {
   return (
@@ -53,7 +54,7 @@ const RoadMapMain = () => {
         onItemClick={(index) => setActiveIndex(index)}
       ></MobileStatusNavigation>
       <div
-        className="flex lg:gap-8 md:gap-[10px] sm:w-[300vw] sm:transition-[transform] sm:duration-300 lgmd:!translate-x-0"
+        className="grid grid-cols-3 lg:gap-8 md:gap-[10px] sm:w-[300vw] sm:transition-[transform] sm:duration-300 lgmd:!translate-x-0"
         style={{ transform: `translate(${-100 * activeIndex}vw, 0)` }}
       >
         {statuses.map((status, index) => (
@@ -134,7 +135,7 @@ const StatusItem = ({ feedbacks, status }: StatusItemProps) => {
   const { color, description, label } = roadMapItemMap[status];
 
   return (
-    <div className="flex flex-col gap-8 grow sm:px-6 sm:w-screen">
+    <div className="flex flex-col gap-8 sm:px-6 sm:w-screen">
       <div>
         <h3 className="h3 text-navy-blue">
           {label} {fetchStatus == "fetching" ? "" : `(${feedbacks.length})`}
@@ -148,6 +149,7 @@ const StatusItem = ({ feedbacks, status }: StatusItemProps) => {
           {feedbacks.length ? (
             feedbacks.map((feedback) => (
               <RoadmapFeedbackSummary
+                to={`/feedbacks/${feedback.id}/comments`}
                 feedback={feedback}
                 status={status}
                 key={feedback.id}
@@ -180,18 +182,26 @@ const FeedbacksLoading = ({ status }: { status: Status }) => {
 interface RoadmapFeedbackSummaryProps {
   feedback: FeedbackWith_UpVotes_Comments;
   status: Status;
+  to?: string;
 }
 
 const RoadmapFeedbackSummary = ({
   feedback,
   status,
+  to,
 }: RoadmapFeedbackSummaryProps) => {
+  const router = useRouter();
   const { color, label } = roadMapItemMap[status];
+
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    if (to) router.push(to);
+  };
 
   return (
     <div
+      onClick={handleBackgroundClick}
       className="bg-white lg:p-8 md:px-5 md:py-6 sm:p-6 rounded-[5px] border-t-[6px] border-solid"
-      style={{ borderColor: color }}
+      style={{ borderColor: color, cursor: to ? "pointer" : "default" }}
     >
       <div className="flex items-center gap-4 lg:mb-2 mdsm:mb-4">
         <div
@@ -205,7 +215,12 @@ const RoadmapFeedbackSummary = ({
         <p className="body1 text-steel-blue">{feedback.description}</p>
       </div>
       <div className="mb-4">
-        <FeedbackType category={feedback.category}></FeedbackType>
+        <FeedbackType
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          category={feedback.category}
+        ></FeedbackType>
       </div>
       <div className="flex items-center justify-between w-full">
         <UpVoteButton feedbackId={feedback.id} horizontal></UpVoteButton>

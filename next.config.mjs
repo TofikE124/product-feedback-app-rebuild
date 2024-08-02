@@ -4,6 +4,8 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "upload.wikimedia.org" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "ibb.co" },
+      { protocol: "https", hostname: "i.ibb.co" },
     ],
   },
   async redirects() {
