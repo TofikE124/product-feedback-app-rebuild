@@ -79,3 +79,31 @@ export async function PATCH(request: NextRequest, { params: { id } }: Props) {
 
   return NextResponse.json(editedFeedback, { status: 200 });
 }
+
+export async function DELETE(request: NextRequest, { params: { id } }: Props) {
+  const session = await getServerSession();
+  if (!session?.user)
+    return NextResponse.json(
+      { message: "You are not allowed to do that" },
+      { status: 401 }
+    );
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email! },
+  });
+
+  if (!user)
+    return NextResponse.json(
+      { message: "You are not allowed to do that" },
+      { status: 401 }
+    );
+
+  const deletedFeedback = await prisma.feedback.delete({ where: { id } });
+
+  if (!deletedFeedback)
+    return NextResponse.json(
+      { message: "Feedback Not Found" },
+      { status: 404 }
+    );
+  return NextResponse.json(deletedFeedback, { status: 200 });
+}

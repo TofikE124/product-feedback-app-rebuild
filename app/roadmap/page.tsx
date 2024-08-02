@@ -41,9 +41,7 @@ const Header = () => {
 };
 
 const RoadMapMain = () => {
-  const { data: feedbacks, fetchStatus: feedbackFetchStatus } =
-    useLoadFeedbacks();
-  const { data: myUpvotes } = useGetUserUpvotes();
+  const { data: feedbacks } = useLoadFeedbacks();
   const statuses = Object.values(Status);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -156,7 +154,9 @@ const StatusItem = ({ feedbacks, status }: StatusItemProps) => {
               ></RoadmapFeedbackSummary>
             ))
           ) : (
-            <FeedbacksEmpty></FeedbacksEmpty>
+            <div className="lgmd:hidden">
+              <FeedbacksEmpty></FeedbacksEmpty>
+            </div>
           )}
         </div>
       )}
@@ -246,11 +246,26 @@ const RoadmapFeedbackSummaryLoading = ({
           width={150}
           height={40}
           className="h-[40px]"
+          containerClassName="md:hidden"
         ></LoadingSkeleton>
         <LoadingSkeleton
           width={250}
           height={25}
           className="h-[25px]"
+          containerClassName="md:hidden"
+        ></LoadingSkeleton>
+
+        <LoadingSkeleton
+          width={125}
+          height={40}
+          className="h-[40px]"
+          containerClassName="hidden md:block"
+        ></LoadingSkeleton>
+        <LoadingSkeleton
+          width={180}
+          height={25}
+          className="h-[25px]"
+          containerClassName="hidden md:block"
         ></LoadingSkeleton>
       </div>
       <div className="mb-4">

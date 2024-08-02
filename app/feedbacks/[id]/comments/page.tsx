@@ -330,12 +330,14 @@ interface CommentSummaryProps {
   comment: CommentWith_User_RepliesLength;
   index?: number;
   isReply?: boolean;
+  isLast?: boolean;
 }
 
 export const CommentSummary = ({
   comment,
   index,
   isReply,
+  isLast,
 }: CommentSummaryProps) => {
   const [isReplying, setIsReplying] = useState(false);
   const [areRepliesExpanded, setAreRepliesExpanded] = useState(false);
@@ -412,8 +414,7 @@ export const CommentSummary = ({
           ></CommentSummaryReplies>
         </div>
       </div>
-
-      {isReply ? <ReplyLeftBorder></ReplyLeftBorder> : null}
+      {isReply && !isLast ? <ReplyLeftBorder></ReplyLeftBorder> : null}
     </div>
   );
 };
@@ -442,7 +443,12 @@ const CommentSummaryReplies = ({
         </div>
       ) : null}
       {replies?.map((reply, index) => (
-        <CommentSummary comment={reply} index={index} isReply></CommentSummary>
+        <CommentSummary
+          comment={reply}
+          index={index}
+          isReply
+          isLast={index == replies.length - 1}
+        ></CommentSummary>
       ))}
     </div>
   ) : null;
@@ -537,7 +543,7 @@ const CommentLeftBorder = ({
 
 const ImageLeftBorder = () => {
   return (
-    <div className="absolute left-0 -translate-x-full top-1/2 w-[52px] h-[1px] bg-[#8C92B3]/25"></div>
+    <div className="absolute left-0 -translate-x-full -translate-y-full top-1/2 w-[52px] h-[26px] rounded-bl-3xl  border-[#8C92B3]/25 border-solid border-[1px] border-t-0 border-r-0"></div>
   );
 };
 

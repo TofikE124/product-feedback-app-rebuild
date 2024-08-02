@@ -1,19 +1,19 @@
+import { feedbackSchema } from "@/schemas/feedbackSchema";
 import { Category, Feedback, Status } from "@prisma/client";
-import Link from "next/link";
-import { useForm, UseFormReturn } from "react-hook-form";
+import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import Button from "./Button";
 import Dropdown from "./Dropdown";
 import TextField from "./TextField";
-import { feedbackSchema } from "@/schemas/feedbackSchema";
-import { z } from "zod";
-import Image from "next/image";
 
-import NewFeedbackIcon from "/public/shared/icon-new-feedback.svg";
-import EditFeedbackIcon from "/public/shared/icon-edit-feedback.svg";
-import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FeedbackFormLoading from "./FeedbackFormLoading";
 import { useRouter } from "next/navigation";
+import EditFeedbackIcon from "/public/shared/icon-edit-feedback.svg";
+import NewFeedbackIcon from "/public/shared/icon-new-feedback.svg";
+import { useDeleteFeedback } from "@/hooks/useDeleteFeedback";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 type feedbackType = z.infer<typeof feedbackSchema>;
 
@@ -24,6 +24,9 @@ interface FeedbackFormProps {
 }
 
 const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
+  const { mutate, status: deleteStatus } = useDeleteFeedback(
+    feedback?.id || ""
+  );
   const router = useRouter();
 
   const categories = Object.values(Category).map((category) => ({
@@ -38,7 +41,7 @@ const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
 
   const {
     register,
-    formState: { errors },
+    formState: { errors, isDirty },
     setValue,
     handleSubmit,
   } = useForm<feedbackType>({
@@ -54,6 +57,14 @@ const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
 
   const getOptionFromStatus = (status: Status) => {
     return statuses.find(({ value }) => value == status);
+  };
+
+  const handleDelete = () => {
+    mutate();
+  };
+
+  const handleCancel = () => {
+    router.back();
   };
 
   return (
@@ -96,7 +107,7 @@ const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
             }
             color="cloudy-white"
             onValueChange={({ value }) => {
-              setValue("category", value);
+              setValue("category", value, { shouldDirty: true });
             }}
             zIndex={6}
           ></Dropdown>
@@ -113,7 +124,7 @@ const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
             }
             color="cloudy-white"
             onValueChange={({ value }) => {
-              setValue("status", value);
+              setValue("status", value, { shouldDirty: true });
             }}
           ></Dropdown>
         </div>
@@ -131,19 +142,33 @@ const FeedbackForm = ({ onSubmit, isPending, feedback }: FeedbackFormProps) => {
         </div>
       </div>
       <div className="flex sm:flex-col gap-4 justify-end lgmd:mt-8 sm:mt-10">
+        {feedback ? (
+          <Button
+            type="button"
+            onClick={handleDelete}
+            color="crimson"
+            className="lgmd:mr-auto sm:order-2"
+            disabled={deleteStatus == "pending"}
+          >
+            {deleteStatus == "pending" ? "Deleting..." : "Delete"}
+          </Button>
+        ) : null}
         <Button
-          onClick={() => router.back()}
+          onClick={handleCancel}
           type="button"
           color="navy-blue"
           className="sm:w-full sm:order-1"
         >
           Cancel
         </Button>
-        <Button className="sm:w-full" disabled={isPending}>
+        <Button
+          className="sm:w-full"
+          disabled={isPending || (feedback && !isDirty)}
+        >
           {feedback
             ? isPending
-              ? "Editing Feedback..."
-              : "Edit Feedback"
+              ? "Saving Changes..."
+              : "Save Changes"
             : isPending
             ? "Adding Feedback..."
             : "Add Feedback"}
