@@ -1,4 +1,4 @@
-import AuthPanel from "@/components/panels/LoginFormPanel";
+import AuthPanel from "@/components/panels/AuthPanel";
 import React from "react";
 
 const Panels = () => {

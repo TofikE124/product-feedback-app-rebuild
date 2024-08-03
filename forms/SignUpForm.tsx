@@ -5,24 +5,35 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 
+import Icon from "@/components/Icon";
 import EmailIcon from "/public/shared/icon-email.svg";
 import PasswordIcon from "/public/shared/icon-password.svg";
+import EyeOpenedIcon from "/public/shared/icon-eye-opened.svg";
+import EyeClosedIcon from "/public/shared/icon-eye-closed.svg";
+import UserIcon from "/public/shared/icon-user.svg";
+
+import { useState } from "react";
 
 type SignupSchemaType = z.infer<typeof signUpSchema>;
 
 interface SignUpFormProps {
+  redirect?: boolean;
   callbackUrl?: string;
   onLoginClick?: () => void;
 }
 
-const SignUpForm = ({ callbackUrl, onLoginClick }: SignUpFormProps) => {
+const SignUpForm = ({
+  callbackUrl = "/",
+  redirect = true,
+  onLoginClick,
+}: SignUpFormProps) => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -51,17 +62,14 @@ const SignUpForm = ({ callbackUrl, onLoginClick }: SignUpFormProps) => {
       })
       .then((response) => {
         signIn("credentials", {
-          redirect: false,
+          redirect,
           email: data.email,
           password: data.password,
+          callbackUrl,
         });
       })
       .catch((err) => {});
   };
-
-  useEffect(() => {
-    if (session?.user) router.replace("/");
-  }, [session]);
 
   const handleLoginClick = () => {
     if (onLoginClick) onLoginClick();
@@ -79,6 +87,15 @@ const SignUpForm = ({ callbackUrl, onLoginClick }: SignUpFormProps) => {
       </p>
       <div className="mt-10 flex flex-col gap-6">
         <div className="flex flex-col gap-1">
+          <p className="body3  text-steel-blue">Username</p>
+          <TextField
+            {...register("name")}
+            placeholder="e.g alex"
+            errorMessage={errors.name?.message}
+            icon={UserIcon}
+          ></TextField>
+        </div>
+        <div className="flex flex-col gap-1">
           <p className="body3  text-steel-blue">Email adress</p>
           <TextField
             {...register("email")}
@@ -89,23 +106,68 @@ const SignUpForm = ({ callbackUrl, onLoginClick }: SignUpFormProps) => {
         </div>
         <div className="flex flex-col gap-1">
           <p className="body3  text-steel-blue">Create Password</p>
-          <TextField
-            {...register("password")}
-            placeholder="Enter your password"
-            type="password"
-            errorMessage={errors.password?.message}
-            icon={PasswordIcon}
-          ></TextField>
+          <div className="w-full flex items-center gap-2">
+            <TextField
+              {...register("password")}
+              placeholder="Enter your password"
+              type={showPassword ? "text" : "password"}
+              errorMessage={errors.password?.message}
+              icon={PasswordIcon}
+            ></TextField>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <Icon
+                  icon={EyeOpenedIcon}
+                  color="#3a4374"
+                  width={24}
+                  height={24}
+                ></Icon>
+              ) : (
+                <Icon
+                  icon={EyeClosedIcon}
+                  color="#3a4374"
+                  width={24}
+                  height={24}
+                ></Icon>
+              )}
+            </button>
+          </div>
         </div>
+
         <div className="flex flex-col gap-1">
           <p className="body3  text-steel-blue">Confirm Password</p>
-          <TextField
-            {...register("repeatedPassword")}
-            placeholder="Enter your password"
-            type="password"
-            errorMessage={errors.repeatedPassword?.message}
-            icon={PasswordIcon}
-          ></TextField>
+          <div className="w-full flex items-center gap-2">
+            <TextField
+              {...register("repeatedPassword")}
+              placeholder="Enter your password"
+              type={showPassword ? "text" : "password"}
+              errorMessage={errors.repeatedPassword?.message}
+              icon={PasswordIcon}
+            ></TextField>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <Icon
+                  icon={EyeOpenedIcon}
+                  color="#3a4374"
+                  width={24}
+                  height={24}
+                ></Icon>
+              ) : (
+                <Icon
+                  icon={EyeClosedIcon}
+                  color="#3a4374"
+                  width={24}
+                  height={24}
+                ></Icon>
+              )}
+            </button>
+          </div>
         </div>
         <p className="body3 font-normal text-navy-blue">
           Password must contain at least 8 characters

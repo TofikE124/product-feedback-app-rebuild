@@ -17,7 +17,7 @@ const page = () => {
             </Link>
           </div>
           <div className="mt-14">
-            <LoginForm callbackUrl=""></LoginForm>
+            <LoginForm callbackUrl="/"></LoginForm>
           </div>
         </div>
       </div>

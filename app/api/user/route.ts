@@ -12,17 +12,27 @@ export async function POST(request: NextRequest) {
   if (!validation.success)
     return NextResponse.json(validation.error.errors, { status: 400 });
 
-  const { email, password } = body as signUpSchemaType;
+  const { email, password, name } = body as signUpSchemaType;
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ email }, { name }] },
+  });
   if (user)
-    return NextResponse.json(
-      { message: "User with this emaill already exists" },
-      { status: 400 }
-    );
+    if (user?.email == email)
+      return NextResponse.json(
+        { message: "User with this emaill already exists" },
+        { status: 400 }
+      );
+    else
+      return NextResponse.json(
+        { message: "User with this Username already exists" },
+        { status: 400 }
+      );
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await prisma.user.create({ data: { email, hashedPassword } });
+  const newUser = await prisma.user.create({
+    data: { email, hashedPassword, name },
+  });
   return NextResponse.json(newUser, { status: 201 });
 }

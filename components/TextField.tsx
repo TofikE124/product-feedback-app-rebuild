@@ -13,7 +13,7 @@ type TextFieldProps = {
 const TextField = forwardRef(
   ({ errorMessage, textarea, icon, ...props }: TextFieldProps, ref) => {
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-full">
         <TextFieldMain
           errorMessage={errorMessage}
           textarea={textarea}

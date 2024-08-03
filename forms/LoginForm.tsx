@@ -9,26 +9,33 @@ import { useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
-
 import { twMerge } from "tailwind-merge";
+
+import Icon from "@/components/Icon";
 import EmailIcon from "/public/shared/icon-email.svg";
 import GoogleIcon from "/public/shared/icon-google.png";
 import PasswordIcon from "/public/shared/icon-password.svg";
+import EyeOpenedIcon from "/public/shared/icon-eye-opened.svg";
+import EyeClosedIcon from "/public/shared/icon-eye-closed.svg";
 
 type LoginSchemaType = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   callbackUrl?: string;
+  redirect?: boolean;
   className?: string;
   onCreateAccountClick?: () => void;
 }
 
 const LoginForm = ({
-  callbackUrl,
+  callbackUrl = "/",
+  redirect = true,
   onCreateAccountClick,
   className,
 }: LoginFormProps) => {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -47,7 +54,8 @@ const LoginForm = ({
     signIn("credentials", {
       email: data.email,
       password: data.password,
-      redirect: false,
+      redirect,
+      callbackUrl,
     })
       .then((res) => {
         if (!res?.ok) {
@@ -55,7 +63,6 @@ const LoginForm = ({
           return;
         }
         toast.success("Logged in Successfully");
-        router.push("/");
       })
       .catch((err) => {
         toast.error("Coludn't login");
@@ -72,7 +79,7 @@ const LoginForm = ({
   };
 
   const loginWithGoogle = () => {
-    signIn("google", { redirect: false, callbackUrl: "/" });
+    signIn("google", { redirect, callbackUrl });
   };
 
   const handleCreateAccountClick = () => {
@@ -101,13 +108,35 @@ const LoginForm = ({
         </div>
         <div className="flex flex-col gap-1">
           <p className="body3  text-steel-blue">Password</p>
-          <TextField
-            {...register("password")}
-            placeholder="Enter your password"
-            type="password"
-            errorMessage={errors.password?.message}
-            icon={PasswordIcon}
-          ></TextField>
+          <div className="w-full flex items-center gap-2">
+            <TextField
+              {...register("password")}
+              placeholder="Enter your password"
+              type={showPassword ? "text" : "password"}
+              errorMessage={errors.password?.message}
+              icon={PasswordIcon}
+            ></TextField>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <Icon
+                  icon={EyeOpenedIcon}
+                  color="#3a4374"
+                  width={24}
+                  height={24}
+                ></Icon>
+              ) : (
+                <Icon
+                  icon={EyeClosedIcon}
+                  color="#3a4374"
+                  width={24}
+                  height={24}
+                ></Icon>
+              )}
+            </button>
+          </div>
         </div>
         <Button color="navy-blue">Login</Button>
         <Button

@@ -18,6 +18,8 @@ const Icon = ({ icon, color, height, width }: IconProps) => {
         WebkitMaskImage: `url(${icon.src})`,
         maskImage: `url(${icon.src})`,
         backgroundColor: color,
+        width,
+        height,
       }}
     >
       <Image
