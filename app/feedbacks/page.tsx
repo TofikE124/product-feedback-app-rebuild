@@ -22,8 +22,9 @@ import { signOut, useSession } from "next-auth/react";
 import { Suspense, useEffect, useState } from "react";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
 import AddFeedback from "@/components/panels/AddFeedback";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 
-export default function Home() {
+export default function Page() {
   return (
     <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen lg:py-[17px] md:pt-[17px] md:pb-[40px] sm:pb-[50px] ">
       <div className="flex flex-col gap-8">
@@ -33,10 +34,12 @@ export default function Home() {
             <SuggestionsControls></SuggestionsControls>
           </div>
           <div className="flex flex-col gap-6 w-full h-full">
-            <Suspense>
+            <Suspense
+              fallback={<SuggestionsToolbarLoading></SuggestionsToolbarLoading>}
+            >
               <SuggestionsToolbar></SuggestionsToolbar>
             </Suspense>
-            <Suspense>
+            <Suspense fallback={<FeedbacksLoading></FeedbacksLoading>}>
               <Feedbacks></Feedbacks>
             </Suspense>
           </div>
@@ -100,6 +103,18 @@ const SuggestionsToolbar = () => {
       <SortByDropdown></SortByDropdown>
       <AddFeedback className="ml-auto"></AddFeedback>
     </div>
+  );
+};
+
+const SuggestionsToolbarLoading = () => {
+  return (
+    <LoadingSkeleton
+      width="100%"
+      baseColor="#3A4374"
+      highlightColor="#4D5581"
+      containerClassName="sm:h-[78.5px] lgmd:h-[121px]"
+      className="lgmd:!rounded-[10px] sm:!rounded-none"
+    ></LoadingSkeleton>
   );
 };
 
@@ -210,7 +225,7 @@ const SuggestionHeader = ({ isOpened, onToggle }: SuggestionHeaderProps) => {
 
   return (
     <>
-      <div className="sm:hidden lg:h-[140px] md:basis-full flex justify-between lgmd:items-end lgmd:p-6 z-20 lgmd:rounded-[10px] bg-cover lg:bg-[url(/suggestions/desktop/background-header.png)] md:bg-[url(/suggestions/tablet/background-header.png)]">
+      <div className="sm:hidden lg:h-[140px] md:basis-full md:min-h-[173.5px] flex justify-between lgmd:items-end lgmd:p-6 z-20 lgmd:rounded-[10px] bg-cover lg:bg-[url(/suggestions/desktop/background-header.png)] md:bg-[url(/suggestions/tablet/background-header.png)]">
         <div>
           <h2 className="h2 text-white">
             Hello {status == "loading" ? "..." : session?.user?.name || "Guest"}
@@ -310,10 +325,12 @@ const SuggestionsMenu = ({ isOpened, onClose }: SuggestionsMenuProps) => {
         }`}
       >
         <UserGreetingMobile></UserGreetingMobile>
-        <Suspense>
+        <Suspense
+          fallback={<SuggestionFilterLoading></SuggestionFilterLoading>}
+        >
           <SuggestionFilter></SuggestionFilter>
         </Suspense>
-        <Suspense>
+        <Suspense fallback={<RoadmapLoading></RoadmapLoading>}>
           <RoadMap></RoadMap>
         </Suspense>
         <MobileUserStatus></MobileUserStatus>
@@ -398,6 +415,19 @@ const SuggestionFilter = () => {
   );
 };
 
+const SuggestionFilterLoading = () => {
+  return (
+    <div className="lg:w-[255px] lg:h-[170.5px] md:w-full h-[173.5px] bg-white rounded-[10px] p-6 flex gap-[14px] flex-wrap">
+      <LoadingSkeleton width={48} height={31.5}></LoadingSkeleton>
+      <LoadingSkeleton width={70} height={31.5}></LoadingSkeleton>
+      <LoadingSkeleton width={55} height={31.5}></LoadingSkeleton>
+      <LoadingSkeleton width={60} height={31.5}></LoadingSkeleton>
+      <LoadingSkeleton width={65} height={31.5}></LoadingSkeleton>
+      <LoadingSkeleton width={80} height={31.5}></LoadingSkeleton>
+    </div>
+  );
+};
+
 const RoadMap = () => {
   const { data: feedbacks, fetchStatus: feedbackFetchStatus } =
     useGetFeedbacks(false);
@@ -422,6 +452,39 @@ const RoadMap = () => {
           ></StatusItem>
         ))}
       </div>
+    </div>
+  );
+};
+
+const RoadmapLoading = () => {
+  return (
+    <div className="bg-white rounded-[10px] p-6 lg:w-[255px] lg:h-[170.5px] md:w-full h-[173.5px]">
+      <div className="w-full flex justify-between items-center">
+        <LoadingSkeleton width={100} height={27}></LoadingSkeleton>
+        <LoadingSkeleton width={30} height={20}></LoadingSkeleton>
+      </div>
+      <div className="flex flex-col gap-2 mt-6">
+        <StatusItemLoading></StatusItemLoading>
+        <StatusItemLoading></StatusItemLoading>
+        <StatusItemLoading></StatusItemLoading>
+      </div>
+    </div>
+  );
+};
+
+const StatusItemLoading = () => {
+  return (
+    <div className="w-full flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <LoadingSkeleton
+          width={8}
+          height={8}
+          circle
+          containerClassName="h-2"
+        ></LoadingSkeleton>
+        <LoadingSkeleton width={45} height={20}></LoadingSkeleton>
+      </div>
+      <LoadingSkeleton width={10} height={20}></LoadingSkeleton>
     </div>
   );
 };
@@ -492,6 +555,16 @@ const Feedbacks = () => {
       ) : (
         <FeedbacksEmpty></FeedbacksEmpty>
       )}
+    </div>
+  );
+};
+
+const FeedbacksLoading = () => {
+  return (
+    <div className="flex flex-col gap-5">
+      <FeedbackSummaryLoading></FeedbackSummaryLoading>
+      <FeedbackSummaryLoading></FeedbackSummaryLoading>
+      <FeedbackSummaryLoading></FeedbackSummaryLoading>
     </div>
   );
 };

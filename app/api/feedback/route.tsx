@@ -1,8 +1,7 @@
 import prisma from "@/prisma/client";
 import { feedbackSchema } from "@/schemas/feedbackSchema";
 import { SortingDirection, SortingProperty } from "@/types/Sorting";
-import { delay } from "@/utils/delay";
-import { Category, Feedback, Prisma, Status } from "@prisma/client";
+import { Category, Prisma, Status } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";

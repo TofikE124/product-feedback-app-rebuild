@@ -24,7 +24,7 @@ const Panel = ({ children, name, closeButton, className }: PanelProps) => {
     >
       <div
         className={twMerge(
-          `relative z-30 bg-white dark:bg-dark-grey p-8 w-[480px] rounded-md max-w-[480px] sm:max-w-[90%] transition-transform duration-300 h-full overflow-scroll ${
+          `relative z-30 bg-white dark:bg-dark-grey p-8 w-[480px] rounded-md max-w-[480px] sm:max-w-[90%] transition-transform duration-300 h-full sm:overflow-scroll ${
             isPanelOpen(name) ? "scale-100" : "scale-0"
           }`,
           className
