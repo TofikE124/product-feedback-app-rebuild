@@ -276,7 +276,7 @@ const SuggestionHeaderMobile = ({
     <div
       className={`lgmd:hidden fixed top-0 left-0 right-0 flex justify-between items-center py-4 px-6 z-20 bg-cover bg-[url(/suggestions/mobile/background-header.png)]
         transition-transform duration-300 ${
-          showHeader ? "translate-y-0" : "-translate-y-full"
+          showHeader || isOpened ? "translate-y-0" : "-translate-y-full"
         }`}
     >
       <div>
