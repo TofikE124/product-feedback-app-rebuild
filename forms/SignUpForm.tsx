@@ -55,7 +55,6 @@ const SignUpForm = ({
       .promise(signUpPromise, {
         loading: "Signing Up",
         error: (error: AxiosError<{ message: string }>) => {
-          console.log(error, error.response?.data?.message);
           return error.response?.data?.message ?? "Couldn't sign up";
         },
         success: "Signed Up Successfully",

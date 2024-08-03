@@ -43,7 +43,6 @@ export const useUpvote = (id: string) => {
       queryClient.setQueryData(["upvotes"], context?.oldUpvotes);
     },
     onSettled: () => {
-      console.log("settled upvoting");
       queryClient.invalidateQueries({ queryKey: ["feedbacks", id] });
       queryClient.invalidateQueries({ queryKey: ["upvotes"] });
     },

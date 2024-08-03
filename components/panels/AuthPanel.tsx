@@ -8,13 +8,17 @@ import { useSession } from "next-auth/react";
 import { usePanel } from "@/providers/PanelProvider";
 
 const AuthPanel = () => {
-  const { closePanel } = usePanel();
+  const { closePanel, isPanelOpen } = usePanel();
   const { data: session, status } = useSession();
   const [currentForm, setCurrentForm] = useState<"login" | "signup">("login");
 
   useEffect(() => {
     if (status == "authenticated") closePanel(PANELS.AUTH_PANEL);
   }, [status]);
+
+  useEffect(() => {
+    if (isPanelOpen(PANELS.AUTH_PANEL)) setCurrentForm("login");
+  }, [isPanelOpen(PANELS.AUTH_PANEL)]);
 
   return (
     <Panel name={PANELS.AUTH_PANEL} closeButton>

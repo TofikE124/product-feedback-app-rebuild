@@ -19,7 +19,7 @@ import { SortingDirection, SortingProperty } from "@/types/Sorting";
 import { getStatusCount } from "@/utils/getStatusCount";
 import { Category, Status } from "@prisma/client";
 import { signOut, useSession } from "next-auth/react";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
 import AddFeedback from "@/components/panels/AddFeedback";
 
@@ -29,7 +29,7 @@ export default function Home() {
       <div className="flex flex-col gap-8">
         <Header></Header>
         <div className="flex mdsm:flex-col lgmd:gap-8 ">
-          <div className="grid grid-rows-[max-content,max-content] md:grid-cols-3 md:gap-[10px] lg:gap-6 lg:max-w-[255px]">
+          <div className="grid grid-rows-[max-content,max-content] md:grid-cols-3 md:gap-[10px] lg:gap-6 lg:max-w-[255px] sm:h-[78.5px]">
             <SuggestionsControls></SuggestionsControls>
           </div>
           <div className="flex flex-col gap-6 w-full h-full">
@@ -209,7 +209,61 @@ const SuggestionHeader = ({ isOpened, onToggle }: SuggestionHeaderProps) => {
   const { data: session, status } = useSession();
 
   return (
-    <div className="lg:h-[140px] md:basis-full flex justify-between lgmd:items-end sm:items-center lgmd:p-6 sm:py-4 sm:px-6 z-20 lgmd:rounded-[10px] bg-cover lg:bg-[url(/suggestions/desktop/background-header.png)] md:bg-[url(/suggestions/tablet/background-header.png)] sm:bg-[url(/suggestions/mobile/background-header.png)]">
+    <>
+      <div className="sm:hidden lg:h-[140px] md:basis-full flex justify-between lgmd:items-end lgmd:p-6 z-20 lgmd:rounded-[10px] bg-cover lg:bg-[url(/suggestions/desktop/background-header.png)] md:bg-[url(/suggestions/tablet/background-header.png)]">
+        <div>
+          <h2 className="h2 text-white">
+            Hello {status == "loading" ? "..." : session?.user?.name || "Guest"}
+          </h2>
+          <p className="body-2 text-white/75">Feedbak Board</p>
+        </div>
+      </div>
+      <SuggestionHeaderMobile
+        isOpened={isOpened}
+        onToggle={onToggle}
+      ></SuggestionHeaderMobile>
+    </>
+  );
+};
+
+interface SuggestionHeaderMobileProps {
+  isOpened: boolean;
+  onToggle: () => void;
+}
+
+const SuggestionHeaderMobile = ({
+  isOpened,
+  onToggle,
+}: SuggestionHeaderMobileProps) => {
+  const { data: session, status } = useSession();
+
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY) {
+        setShowHeader(false); // scrolling down
+      } else {
+        setShowHeader(true); // scrolling up
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
+
+  return (
+    <div
+      className={`lgmd:hidden fixed top-0 left-0 right-0 flex justify-between items-center py-4 px-6 z-20 bg-cover bg-[url(/suggestions/mobile/background-header.png)]
+        transition-transform duration-300 ${
+          showHeader ? "translate-y-0" : "-translate-y-full"
+        }`}
+    >
       <div>
         <h2 className="h2 text-white">
           Hello {status == "loading" ? "..." : session?.user?.name || "Guest"}

@@ -34,7 +34,7 @@ export const useEditFeedback = (feedbackId: string) => {
     },
     onSuccess: () => {
       toast.success("Changes Saved Successfully");
-      router.push(`/feedbacks/${feedbackId}/comments`);
+      router.back();
       queryClient.invalidateQueries({ queryKey: ["feedbacks", feedbackId] });
     },
   });
