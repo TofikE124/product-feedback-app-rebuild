@@ -73,10 +73,10 @@ model User {
   username      String?         @unique
   email         String?         @unique
   emailVerified DateTime?
-  image         String?
+  image         String?         @default("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/2048px-Default_pfp.svg.png")
   Session       Session[]
   Account       Account?
-  // Optional for WebAuthn support
+  hashedPassword String?
   Authenticator Authenticator[]
 
   createdAt DateTime @default(now())

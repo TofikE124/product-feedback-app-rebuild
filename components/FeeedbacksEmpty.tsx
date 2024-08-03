@@ -1,6 +1,5 @@
-import Link from "next/link";
-import Button from "./Button";
 import Image from "next/image";
+import AddFeedback from "./panels/AddFeedback";
 import IllustrationEmpty from "/public/suggestions/illustration-empty.svg";
 
 const FeedbacksEmpty = () => {
@@ -17,9 +16,7 @@ const FeedbacksEmpty = () => {
           Got a suggestion? Found a bug that needs to be squashed? We love
           hearing about new ideas to improve our app.
         </p>
-        <Link href="/feedbacks/new-feedback" className="block mt-6">
-          <Button className="w-fit">+ Add Feedback</Button>
-        </Link>
+        <AddFeedback className="mt-6" />
       </div>
     </div>
   );

@@ -6,6 +6,9 @@ import { useUpvote } from "@/hooks/useUpvote";
 import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
 import { FeedbackWith_UpVotes_Comments } from "@/types/Feedback";
 import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
+import { useSession } from "next-auth/react";
+import { usePanel } from "@/providers/PanelProvider";
+import { PANELS } from "@/constants/panels";
 
 interface UpVoteProps {
   feedbackId: string;
@@ -19,11 +22,21 @@ const UpVoteButton = ({ feedbackId, horizontal }: UpVoteProps) => {
   const { mutate: handleRemoveUpvote, isPending: isRemovingUpVoting } =
     useRemoveUpvote(feedbackId);
 
+  const { data: session, status } = useSession();
+  const { openPanel } = usePanel();
+
   const isUpvoted = () =>
     myUpVotes.some((vote) => vote.feedbackId == feedbackId);
 
   const handleUpvoteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (status == "loading") return;
+
+    if (status == "unauthenticated") {
+      openPanel(PANELS.AUTH_PANEL);
+      return;
+    }
+
     if (isUpvoted()) handleRemoveUpvote();
     else handleUpVote();
   };

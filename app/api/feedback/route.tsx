@@ -10,23 +10,6 @@ import { z } from "zod";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
-  const session = await getServerSession();
-  if (!session?.user)
-    return NextResponse.json(
-      { message: "You are not allowed to do that" },
-      { status: 401 }
-    );
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email! },
-  });
-
-  if (!user)
-    return NextResponse.json(
-      { message: "You are not allowed to do that" },
-      { status: 401 }
-    );
-
   let orderBy: Prisma.FeedbackOrderByWithRelationInput = {};
 
   const sortBy = searchParams.get("sortBy");
@@ -39,6 +22,8 @@ export async function GET(request: NextRequest) {
         ? { upVotes: { _count: sortDirection } }
         : sortBy == SortingProperty.COMMENTS
         ? { comments: { _count: sortDirection } }
+        : sortBy == SortingProperty.Date_Updated
+        ? { updatedAt: sortDirection }
         : {};
   }
 

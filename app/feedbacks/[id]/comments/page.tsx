@@ -28,22 +28,27 @@ import PlusCircleIcon from "/public/shared/icon-plus-circle.svg";
 
 import ExpandableTextField from "@/components/ExpandableTextField";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { PANELS } from "@/constants/panels";
 import { useCommentVote } from "@/hooks/useCommentVote";
 import { useCreateReply } from "@/hooks/useCreateReply";
 import { useGetCommentVotes } from "@/hooks/useGetCommentVotes";
 import { useGetReplies } from "@/hooks/useGetReplies";
 import { useIsOwnFeedback } from "@/hooks/useIsOwnFeedback";
+import { useRemoveCommentVote } from "@/hooks/useRemoveCommentVote";
+import { usePanel } from "@/providers/PanelProvider";
 import { calculateCommentVotesSum } from "@/utils/calculateCommentVotesSum";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
-import { useRemoveCommentVote } from "@/hooks/useRemoveCommentVote";
+import Panels from "@/layout/Panels";
 
 interface Props {
   params: { id: string };
 }
 
 const Page = ({ params: { id } }: Props) => {
+  const { data: session } = useSession();
   const { data: feedback, isLoading: isFeedbackLoading } = useGetFeedbackId(id);
   const { data: upvotes } = useGetUserUpvotes();
   const { data: comments, isLoading: isCommentsLoading } = useGetComments(id);
@@ -60,7 +65,11 @@ const Page = ({ params: { id } }: Props) => {
             upvotes={upvotes}
           ></CommentsFeedbackSummary>
           {feedback ? (
-            <AddComment feedbackId={feedback?.id || ""}></AddComment>
+            session?.user ? (
+              <AddComment feedbackId={feedback?.id || ""}></AddComment>
+            ) : (
+              <AddCommentGuest></AddCommentGuest>
+            )
           ) : (
             <AddCommentLoading></AddCommentLoading>
           )}
@@ -143,6 +152,9 @@ const AddComment = ({
   feedbackId,
   onSubmitted = () => {},
 }: AddCommentProps) => {
+  const { openPanel } = usePanel();
+  const { data: session } = useSession();
+
   type createCommentType = z.infer<typeof createCommentSchema>;
   const {
     register,
@@ -196,6 +208,22 @@ const AddCommentLoading = () => {
         className="h-[64px]"
         borderRadius={99999}
       ></LoadingSkeleton>
+    </div>
+  );
+};
+
+const AddCommentGuest = () => {
+  const { openPanel } = usePanel();
+
+  return (
+    <div className="px-8">
+      <Button
+        onClick={() => openPanel(PANELS.AUTH_PANEL)}
+        color="navy-blue-border"
+        className="w-fit"
+      >
+        + Add a Comment
+      </Button>
     </div>
   );
 };
@@ -344,6 +372,8 @@ const CommentSummary = ({
   isReply,
   isLast,
 }: CommentSummaryProps) => {
+  const { openPanel } = usePanel();
+  const { data: session } = useSession();
   const [isReplying, setIsReplying] = useState(false);
   const [areRepliesExpanded, setAreRepliesExpanded] = useState(false);
   const { data: replies } = useGetReplies(comment.id);
@@ -375,6 +405,11 @@ const CommentSummary = ({
     );
   };
 
+  const handleReplyClick = () => {
+    if (session?.user) setIsReplying(true);
+    else openPanel(PANELS.AUTH_PANEL);
+  };
+
   return (
     <div
       className="relative flex gap-8 py-2 w-full items-start"
@@ -399,7 +434,7 @@ const CommentSummary = ({
             <p className="body2 text-steel-blue mb-2">{comment.content}</p>
             <CommentFooter
               commentId={comment.id}
-              onReplyClick={() => setIsReplying(true)}
+              onReplyClick={handleReplyClick}
             ></CommentFooter>
           </div>
         </div>
@@ -585,17 +620,28 @@ interface CommentVoteProps {
 }
 
 const CommentVote = ({ commentId }: CommentVoteProps) => {
+  const { openPanel } = usePanel();
+  const { data: session } = useSession();
+
   const { data } = useGetCommentVotes(commentId);
 
   const { mutate: voteOnComment } = useCommentVote(commentId);
   const { mutate: removeVoteOnComment } = useRemoveCommentVote(commentId);
 
   const handleUpvoteClick = () => {
+    if (!session?.user) {
+      openPanel(PANELS.AUTH_PANEL);
+      return;
+    }
     if (data?.myVoteType == "UPVOTE") {
       removeVoteOnComment();
     } else voteOnComment("UPVOTE");
   };
   const handleDownvoteClick = () => {
+    if (!session?.user) {
+      openPanel(PANELS.AUTH_PANEL);
+      return;
+    }
     if (data?.myVoteType == "DOWNVOTE") {
       removeVoteOnComment();
     } else voteOnComment("DOWNVOTE");

@@ -9,33 +9,80 @@ import Dropdown from "@/components/Dropdown";
 
 import FeedbackSummary from "@/components/FeedbackSummary";
 import FeedbackSummaryLoading from "@/components/FeedbackSummaryLoading";
+import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
+import Logo from "@/components/Logo";
+import OvalLoadingSpinner from "@/components/OvalLoadingSpinner";
 import { roadMapItemMap } from "@/constants/roadMap";
 import { useLoadFeedbacks as useGetFeedbacks } from "@/hooks/useGetFeedbacks";
 import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
 import { SortingDirection, SortingProperty } from "@/types/Sorting";
 import { getStatusCount } from "@/utils/getStatusCount";
 import { Category, Status } from "@prisma/client";
+import { signOut, useSession } from "next-auth/react";
 import { Suspense, useState } from "react";
 import SuggestionsIcon from "/public/suggestions/icon-suggestions.svg";
-import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
+import AddFeedback from "@/components/panels/AddFeedback";
 
 export default function Home() {
   return (
-    <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen flex mdsm:flex-col lgmd:gap-8 lg:py-[94px] md:pt-[94px] md:pb-[40px] sm:pb-[50px] ">
-      <div className="grid grid-rows-[max-content,max-content] md:grid-cols-3 md:gap-[10px] lg:gap-6 lg:max-w-[255px]">
-        <SuggestionsControls></SuggestionsControls>
-      </div>
-      <div className="flex flex-col gap-6 w-full h-full">
-        <Suspense>
-          <SuggestionsToolbar></SuggestionsToolbar>
-        </Suspense>
-        <Suspense>
-          <Feedbacks></Feedbacks>
-        </Suspense>
+    <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen lg:py-[17px] md:pt-[17px] md:pb-[40px] sm:pb-[50px] ">
+      <div className="flex flex-col gap-8">
+        <Header></Header>
+        <div className="flex mdsm:flex-col lgmd:gap-8 ">
+          <div className="grid grid-rows-[max-content,max-content] md:grid-cols-3 md:gap-[10px] lg:gap-6 lg:max-w-[255px]">
+            <SuggestionsControls></SuggestionsControls>
+          </div>
+          <div className="flex flex-col gap-6 w-full h-full">
+            <Suspense>
+              <SuggestionsToolbar></SuggestionsToolbar>
+            </Suspense>
+            <Suspense>
+              <Feedbacks></Feedbacks>
+            </Suspense>
+          </div>
+        </div>
       </div>
     </main>
   );
 }
+
+const Header = () => {
+  const { data: session, status } = useSession();
+
+  const handleLogout = () => {
+    signOut();
+  };
+
+  return (
+    <div className="bg-white rounded-[10px] w-full flex items-center justify-between py-4 px-8 sm:hidden">
+      <Logo></Logo>
+      <div className="ml-auto flex items-center gap-4">
+        {status == "loading" ? (
+          <OvalLoadingSpinner width={30} height={30}></OvalLoadingSpinner>
+        ) : session?.user ? (
+          <>
+            <Image
+              src={session.user.image || ""}
+              alt={`${session.user.name}'s image`}
+              width={40}
+              height={40}
+              className="size-10 rounded-full"
+            />
+            <Button onClick={handleLogout} color="crimson" className="px-8">
+              Logout
+            </Button>
+          </>
+        ) : (
+          <Link href="/login">
+            <Button color="navy-blue" className="px-8">
+              Login
+            </Button>
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const SuggestionsToolbar = () => {
   const { data: feedbacks } = useGetFeedbacks();
@@ -51,9 +98,7 @@ const SuggestionsToolbar = () => {
         {feedbacks?.length} {feedbacks?.length == 1 ? "Feedback" : "Feedbacks"}
       </h3>
       <SortByDropdown></SortByDropdown>
-      <Link href="/feedbacks/new-feedback" className="block ml-auto">
-        <Button>+ Add Feedback</Button>
-      </Link>
+      <AddFeedback className="ml-auto"></AddFeedback>
     </div>
   );
 };
@@ -71,6 +116,13 @@ const SortByDropdown = () => {
   const searchParams = useSearchParams();
 
   const options: SortingOption[] = [
+    {
+      label: "Most Recent",
+      value: {
+        property: SortingProperty.Date_Updated,
+        direction: SortingDirection.DESC,
+      },
+    },
     {
       label: "Most Upvotes",
       value: {
@@ -154,10 +206,14 @@ interface SuggestionHeaderProps {
 }
 
 const SuggestionHeader = ({ isOpened, onToggle }: SuggestionHeaderProps) => {
+  const { data: session, status } = useSession();
+
   return (
     <div className="lg:h-[140px] md:basis-full flex justify-between lgmd:items-end sm:items-center lgmd:p-6 sm:py-4 sm:px-6 z-20 lgmd:rounded-[10px] bg-cover lg:bg-[url(/suggestions/desktop/background-header.png)] md:bg-[url(/suggestions/tablet/background-header.png)] sm:bg-[url(/suggestions/mobile/background-header.png)]">
       <div>
-        <h2 className="h2 text-white">Tofik Elias</h2>
+        <h2 className="h2 text-white">
+          Hello {status == "loading" ? "..." : session?.user?.name || "Guest"}
+        </h2>
         <p className="body-2 text-white/75">Feedbak Board</p>
       </div>
       <div
@@ -199,12 +255,14 @@ const SuggestionsMenu = ({ isOpened, onClose }: SuggestionsMenuProps) => {
           isOpened ? "sm:translate-x-0" : "sm:translate-x-full"
         }`}
       >
+        <UserGreetingMobile></UserGreetingMobile>
         <Suspense>
           <SuggestionFilter></SuggestionFilter>
         </Suspense>
         <Suspense>
           <RoadMap></RoadMap>
         </Suspense>
+        <MobileUserStatus></MobileUserStatus>
       </div>
       <div
         onClick={onClose}
@@ -213,6 +271,42 @@ const SuggestionsMenu = ({ isOpened, onClose }: SuggestionsMenuProps) => {
         } z-10`}
       ></div>
     </>
+  );
+};
+
+const UserGreetingMobile = () => {
+  const { data: session, status } = useSession();
+
+  return (
+    <h2 className="lgmd:hidden h2 text-navy-blue text-center">
+      Hello {status == "loading" ? "..." : session?.user?.name || "Guest"}
+    </h2>
+  );
+};
+
+const MobileUserStatus = () => {
+  const { data: session, status } = useSession();
+
+  return (
+    <div className="mt-auto w-full lgmd:hidden">
+      {status == "loading" ? (
+        <Button color="navy-blue" className="w-full">
+          <div className="flex justify-center">
+            <OvalLoadingSpinner></OvalLoadingSpinner>
+          </div>
+        </Button>
+      ) : status == "authenticated" ? (
+        <Button color="crimson" className="w-full" onClick={() => signOut()}>
+          Logout
+        </Button>
+      ) : (
+        <Link href="/login">
+          <Button color="navy-blue" className="w-full">
+            Login
+          </Button>
+        </Link>
+      )}
+    </div>
   );
 };
 
@@ -251,7 +345,8 @@ const SuggestionFilter = () => {
 };
 
 const RoadMap = () => {
-  const { data: feedbacks } = useGetFeedbacks();
+  const { data: feedbacks, fetchStatus: feedbackFetchStatus } =
+    useGetFeedbacks(false);
   const statuses = Object.values(Status);
 
   return (
@@ -268,6 +363,7 @@ const RoadMap = () => {
             color={roadMapItemMap[status].color}
             label={roadMapItemMap[status].label}
             count={getStatusCount(status, feedbacks || [])}
+            isPending={feedbackFetchStatus == "fetching"}
             key={index}
           ></StatusItem>
         ))}
@@ -280,9 +376,10 @@ interface StatusItemProps {
   label: string;
   color: string;
   count: number;
+  isPending?: boolean;
 }
 
-const StatusItem = ({ color, count, label }: StatusItemProps) => {
+const StatusItem = ({ color, count, label, isPending }: StatusItemProps) => {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -292,7 +389,11 @@ const StatusItem = ({ color, count, label }: StatusItemProps) => {
         ></div>
         <p className="body1 text-steel-blue">{label}</p>
       </div>
-      <p className="body1 font-bold text-steel-blue">{count}</p>
+      {isPending ? (
+        <OvalLoadingSpinner></OvalLoadingSpinner>
+      ) : (
+        <p className="body1 font-bold text-steel-blue">{count}</p>
+      )}
     </div>
   );
 };

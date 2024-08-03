@@ -4,6 +4,7 @@ import Icon from "./Icon";
 import LeftArrowIcon from "/public/shared/icon-caret-left.svg";
 import { twMerge } from "tailwind-merge";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface Props {
   className?: string;
@@ -15,8 +16,13 @@ const GoBack = ({ className, navigateType = "history", iconColor }: Props) => {
   const router = useRouter();
 
   const handleBackClick = () => {
-    if (navigateType == "path") return;
-    router.back();
+    if (navigateType === "path") return;
+
+    if (window.history.length == 2) {
+      window.location.href = "/feedbacks";
+    } else {
+      router.back();
+    }
   };
 
   return (

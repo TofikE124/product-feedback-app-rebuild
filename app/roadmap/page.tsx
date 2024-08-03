@@ -1,19 +1,19 @@
 "use client";
-import Button from "@/components/Button";
 import FeedbackType from "@/components/FeedbackType";
 import FeedbacksEmpty from "@/components/FeeedbacksEmpty";
 import GoBack from "@/components/GoBack";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import AddFeedback from "@/components/panels/AddFeedback";
 import UpVoteButton from "@/components/UpVote";
 import { roadMapItemMap } from "@/constants/roadMap";
 import { useLoadFeedbacks } from "@/hooks/useGetFeedbacks";
 import { FeedbackWith_UpVotes_Comments } from "@/types/Feedback";
 import { Status } from "@prisma/client";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import CommentsIcon from "/public/shared/icon-comments.svg";
+import OvalLoadingSpinner from "@/components/OvalLoadingSpinner";
 
 const page = () => {
   return (
@@ -34,16 +34,13 @@ const Header = () => {
           <GoBack iconColor="#CDD2EE" className="text-white"></GoBack>
           <h1 className="h1 text-white">Roadmap</h1>
         </div>
-        <Link href="/feedbacks/new-feedback">
-          <Button>+ Add Feedback</Button>
-        </Link>
+        <AddFeedback></AddFeedback>
       </div>
     </div>
   );
 };
 
 const RoadMapMain = () => {
-  const { data: feedbacks } = useLoadFeedbacks();
   const statuses = Object.values(Status);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -60,10 +57,7 @@ const RoadMapMain = () => {
       >
         {statuses.map((status, index) => (
           <Suspense key={index}>
-            <StatusItem
-              status={status}
-              feedbacks={getFeedbacksByStatus(feedbacks || [], status)}
-            ></StatusItem>
+            <StatusItem status={status}></StatusItem>
           </Suspense>
         ))}
       </div>
@@ -118,30 +112,39 @@ const MobileStatusNavigationItem = ({
 
   return (
     <div className="py-5 text-center grow cursor-pointer" onClick={onClick}>
-      <p className="text-navy-blue/40 border-y-red-300 font-bold">
+      <div className="text-navy-blue/40 border-y-red-300 font-bold flex items-center gap-2 justify-center">
         {label}{" "}
-        {fetchStatus == "fetching"
-          ? ""
-          : `(${getFeedbacksByStatus(feedbacks || [], status).length})`}
-      </p>
+        {fetchStatus == "fetching" ? (
+          <OvalLoadingSpinner color="#3a437466"></OvalLoadingSpinner>
+        ) : (
+          `(${getFeedbacksByStatus(feedbacks || [], status).length})`
+        )}
+      </div>
     </div>
   );
 };
 
 interface StatusItemProps {
-  feedbacks: FeedbackWith_UpVotes_Comments[];
   status: Status;
 }
 
-const StatusItem = ({ feedbacks, status }: StatusItemProps) => {
+const StatusItem = ({ status }: StatusItemProps) => {
+  const { data: feedbacks } = useLoadFeedbacks();
   const { fetchStatus } = useLoadFeedbacks();
   const { color, description, label } = roadMapItemMap[status];
+
+  const filteredFeedbacks = getFeedbacksByStatus(feedbacks || [], status);
 
   return (
     <div className="flex flex-col gap-8 sm:px-6 sm:w-screen">
       <div>
-        <h3 className="h3 text-navy-blue">
-          {label} {fetchStatus == "fetching" ? "" : `(${feedbacks.length})`}
+        <h3 className="h3 text-navy-blue flex items-center gap-2">
+          {label}{" "}
+          {fetchStatus == "fetching" ? (
+            <OvalLoadingSpinner color="#3a437466"></OvalLoadingSpinner>
+          ) : (
+            `(${filteredFeedbacks.length})`
+          )}
         </h3>
         <p className="text-steel-blue body1">{description}</p>
       </div>
@@ -149,8 +152,8 @@ const StatusItem = ({ feedbacks, status }: StatusItemProps) => {
         <FeedbacksLoading status={status}></FeedbacksLoading>
       ) : (
         <div className="flex flex-col lg:gap-6 mdsm:gap-4">
-          {feedbacks.length ? (
-            feedbacks.map((feedback) => (
+          {filteredFeedbacks.length ? (
+            filteredFeedbacks.map((feedback) => (
               <RoadmapFeedbackSummary
                 to={`/feedbacks/${feedback.id}/comments`}
                 feedback={feedback}

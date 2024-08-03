@@ -5,19 +5,50 @@ import { twMerge } from "tailwind-merge";
 import Icon from "./Icon";
 
 const buttonStyles = cva(
-  ["h4", "rounded-[10px]", "py-3", "px-6", "disabled:opacity-50"],
+  [
+    "h4",
+    "rounded-[10px]",
+    "py-3",
+    "px-6",
+    "disabled:opacity-50",
+    "disabled:cursor-not-allowed",
+  ],
   {
     variants: {
       color: {
         transparent: ["bg-transparent", "text-steel-blue"],
-        violet: ["bg-electric-violet", "text-white", "hover:bg-[#C75AF6]"],
+        violet: [
+          "bg-electric-violet",
+          "text-white",
+          "enabled:hover:bg-[#C75AF6]",
+        ],
         "dark-sky-blue": [
           "bg-dark-sky-blue",
           "text-white",
-          "hover:bg-[#7C91F9]",
+          "enabled:hover:bg-[#7C91F9]",
         ],
-        "navy-blue": ["bg-navy-blue", "text-white", "hover:bg-[#656EA3]"],
-        crimson: ["bg-crimson", "text-white", "hover:bg-[#E98888]"],
+        "navy-blue": [
+          "bg-navy-blue",
+          "text-white",
+          "enabled:hover:bg-[#656EA3]",
+        ],
+        "navy-blue-border": [
+          "border",
+          "border-solid",
+          "border-navy-blue",
+          "text-navy-blue",
+          "bg-navy-blue/0",
+          "enabled:hover:bg-navy-blue/10",
+        ],
+        "violet-border": [
+          "border",
+          "border-solid",
+          "border-electric-violet",
+          "text-electric-violet",
+          "bg-electric-violet/0",
+          "enabled:hover:bg-electric-violet/10",
+        ],
+        crimson: ["bg-crimson", "text-white", "enabled:hover:bg-[#E98888]"],
       },
       variant: {
         text: [],
@@ -49,6 +80,8 @@ const Button = ({
     violet: "",
     "dark-sky-blue": "",
     crimson: "",
+    "navy-blue-border": "",
+    "violet-border": "",
   };
 
   return (
@@ -59,15 +92,15 @@ const Button = ({
       {icon && variant == "text-with-icon" ? (
         <Icon icon={icon} color={iconMapColor[color!] || iconColor} />
       ) : null}
-      <p
-        className={`${
+      <div
+        className={`w-full ${
           variant == "text-with-icon"
-            ? "relative after:contents-[' '] after:absolute after:bottom-0 after:h-[1px] after:bg-current after:w-0 hover:after:w-full after:transition-[width] after:duration-200 after:origin-center after:left-[50%] after:translate-x-[-50%] after:translate-y-[-2px]"
+            ? "relative after:contents-[' '] after:absolute after:bottom-0 after:h-[1px] after:bg-current after:w-0 enabled:hover:after:w-full after:transition-[width] after:duration-200 after:origin-center after:left-[50%] after:translate-x-[-50%] after:translate-y-[-2px]"
             : ""
         }`}
       >
         {children}
-      </p>
+      </div>
     </button>
   );
 };

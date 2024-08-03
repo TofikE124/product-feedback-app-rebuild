@@ -6,9 +6,11 @@ import React from "react";
 interface IconProps {
   icon: StaticImport & { src?: string };
   color?: string;
+  width?: number;
+  height?: number;
 }
 
-const Icon = ({ icon, color }: IconProps) => {
+const Icon = ({ icon, color, height, width }: IconProps) => {
   return (
     <div
       className="w-fit bg-clip-content"
@@ -18,7 +20,13 @@ const Icon = ({ icon, color }: IconProps) => {
         backgroundColor: color,
       }}
     >
-      <Image src={icon} alt="icon" className="opacity-0" />
+      <Image
+        src={icon}
+        alt="icon"
+        className="opacity-0"
+        width={width}
+        height={height}
+      />
     </div>
   );
 };
