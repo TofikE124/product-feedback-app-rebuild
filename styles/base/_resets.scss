@@ -4,3 +4,10 @@
   @apply transition-colors;
   @apply duration-200;
 }
+
+input,
+textarea {
+  @screen sm {
+    font-size: 16px !important;
+  }
+}

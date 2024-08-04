@@ -258,7 +258,9 @@ const SuggestionHeaderMobile = ({
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY) {
+      const MIN_SCROLL = 60;
+
+      if (currentScrollY > lastScrollY && currentScrollY > MIN_SCROLL) {
         setShowHeader(false); // scrolling down
       } else {
         setShowHeader(true); // scrolling up
