@@ -1,7 +1,6 @@
 import Button from "@/components/Button";
 import GoBack from "@/components/GoBack";
 import Logo from "@/components/Logo";
-import Logo from "@/components/Logo";
 import { useIsOwnFeedback } from "@/hooks/useIsOwnFeedback";
 import Link from "next/link";
 
