@@ -11,12 +11,14 @@ interface HeaderProps {
 const Header = ({ feedbackId }: HeaderProps) => {
   return (
     <>
-      <div className="grid grid-cols-3 items-center w-full mb-9 h-[45px]">
-        <GoBack></GoBack>
-        <Link href="/feedbacks" className="justify-self-center">
+      <div className="grid grid-cols-3 sm:grid-cols-2 items-center w-full mb-9 h-[45px]">
+        <div>
+          <GoBack></GoBack>
+        </div>
+        <Link href="/feedbacks" className="lgmd:justify-self-center sm:hidden">
           <Logo></Logo>
         </Link>
-        <div>
+        <div className="w-fit justify-self-end">
           {feedbackId ? (
             <EditFeedback feedbackId={feedbackId}></EditFeedback>
           ) : null}
