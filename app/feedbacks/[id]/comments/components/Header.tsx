@@ -1,5 +1,6 @@
 import Button from "@/components/Button";
 import GoBack from "@/components/GoBack";
+import Logo from "@/components/Logo";
 import { useIsOwnFeedback } from "@/hooks/useIsOwnFeedback";
 import Link from "next/link";
 
@@ -10,11 +11,16 @@ interface HeaderProps {
 const Header = ({ feedbackId }: HeaderProps) => {
   return (
     <>
-      <div className="flex items-center justify-between w-full mb-9 h-[45px]">
+      <div className="grid grid-cols-3 items-center w-full mb-9 h-[45px]">
         <GoBack></GoBack>
-        {feedbackId ? (
-          <EditFeedback feedbackId={feedbackId}></EditFeedback>
-        ) : null}
+        <Link href="/feedbacks" className="justify-self-center">
+          <Logo></Logo>
+        </Link>
+        <div>
+          {feedbackId ? (
+            <EditFeedback feedbackId={feedbackId}></EditFeedback>
+          ) : null}
+        </div>
       </div>
     </>
   );
