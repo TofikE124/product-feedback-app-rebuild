@@ -30,6 +30,7 @@ import CommentIcon from "/public/shared/icon-comments.svg";
 import MinusCircleIcon from "/public/shared/icon-minus-circle.svg";
 import PlusCircleIcon from "/public/shared/icon-plus-circle.svg";
 import ReplyLeftBorder from "./ReplyLeftBorder";
+import ImageLeftBorder from "./ImageLeftBorder";
 
 interface CommentProps {
   comments: CommentWith_User_RepliesLength[];
@@ -82,7 +83,11 @@ const RepliesLoading = ({ count = 3 }: RepliesLoadingProps) => {
   return (
     <div className="flex flex-col gap-4">
       {arr.map((x, index) => (
-        <CommentSummaryLoading key={index}></CommentSummaryLoading>
+        <CommentSummaryLoading
+          key={index}
+          showLeftBorder={index != arr.length - 1}
+          showImageLeftBorder
+        ></CommentSummaryLoading>
       ))}
     </div>
   );
@@ -270,7 +275,7 @@ const CommentSummaryReplies = ({
     <div className="flex flex-col">
       {(isCreatingReply && replies?.length) ||
       repliesFetchStatus == "fetching" ? (
-        <CommentSummaryLoading></CommentSummaryLoading>
+        <CommentSummaryLoading showImageLeftBorder></CommentSummaryLoading>
       ) : null}
       {replies?.map((reply, index) => (
         <CommentSummary
@@ -313,7 +318,7 @@ const CommentSummaryHeader = ({
           {moment(createdAt).fromNow()}
         </h4>
       </div>
-      {repliesNumber ? (
+      {repliesNumber || areRepliesFetched ? (
         <CommentLeftBorder
           firstTime={!areRepliesExpanded && !areRepliesFetched}
           onToggle={onToggleReplies}
@@ -405,12 +410,6 @@ const CommentLeftBorder = ({
   );
 };
 
-const ImageLeftBorder = () => {
-  return (
-    <div className="absolute left-0 -translate-x-full -translate-y-full top-1/2  lg:w-[44px] md:w-[36px] sm:w-[28px] h-[30px] rounded-bl-3xl  border-[#8C92B3]/25 border-solid border-[1px] border-t-0 border-r-0"></div>
-  );
-};
-
 interface CommentFooterProps {
   onReplyClick?: () => void;
   commentId: string;
@@ -422,7 +421,7 @@ const CommentFooter = ({ onReplyClick, commentId }: CommentFooterProps) => {
       <CommentVote commentId={commentId}></CommentVote>
       <button
         onClick={onReplyClick}
-        className="flex gap-2 items-center hover:bg-steel-blue/10 rounded-full lgmd:px-4 py-2"
+        className="flex gap-2 items-center hover:bg-steel-blue/10 rounded-full lgmd:px-4 py-2 w-fit"
       >
         <Image src={CommentIcon} alt="Comments Icon"></Image>
         <div className="body3 text-navy-blue">Reply</div>

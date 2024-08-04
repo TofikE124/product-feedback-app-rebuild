@@ -1,15 +1,27 @@
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import ReplyLeftBorder from "./ReplyLeftBorder";
+import ImageLeftBorder from "./ImageLeftBorder";
 
-const CommentSummaryLoading = () => {
+interface CommentSummaryLoadingProps {
+  showLeftBorder?: boolean;
+  showImageLeftBorder?: boolean;
+}
+
+const CommentSummaryLoading = ({
+  showLeftBorder,
+  showImageLeftBorder,
+}: CommentSummaryLoadingProps) => {
   return (
-    <div className="relative flex gap-8 w-full items-start">
-      <LoadingSkeleton
-        width={40}
-        height={40}
-        borderRadius={99999}
-        containerClassName="h-[40px] w-[40px]"
-      ></LoadingSkeleton>
+    <div className="relative flex gap-8 w-full items-start py-2">
+      <div className="relative">
+        <LoadingSkeleton
+          width={40}
+          height={40}
+          borderRadius={99999}
+          containerClassName="h-[40px] w-[40px]"
+        ></LoadingSkeleton>
+        {showImageLeftBorder ? <ImageLeftBorder></ImageLeftBorder> : null}
+      </div>
 
       <div className="flex flex-col w-full">
         <div className="relative flex flex-col w-full">
@@ -60,7 +72,7 @@ const CommentSummaryLoading = () => {
           ></LoadingSkeleton>
         </div>
       </div>
-      <ReplyLeftBorder></ReplyLeftBorder>
+      {showLeftBorder ? <ReplyLeftBorder></ReplyLeftBorder> : null}
     </div>
   );
 };

@@ -54,7 +54,7 @@ const RoadMapMain = () => {
       `div[data-status-item][data-index="${activeIndex}"]`
     )?.clientHeight;
 
-    ref.current.style.height = `${statusHeight || 0}px`;
+    ref.current.style.height = `${(statusHeight || 0) + 50}px`;
   }, [activeIndex, fetchStatus]);
 
   return (
