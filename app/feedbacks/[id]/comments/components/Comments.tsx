@@ -14,7 +14,7 @@ import { calculateCommentVotesSum } from "@/utils/calculateCommentVotesSum";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -29,6 +29,7 @@ import UpArrowIcon from "/public/shared/icon-arrow-up.svg";
 import CommentIcon from "/public/shared/icon-comments.svg";
 import MinusCircleIcon from "/public/shared/icon-minus-circle.svg";
 import PlusCircleIcon from "/public/shared/icon-plus-circle.svg";
+import ReplyLeftBorder from "./ReplyLeftBorder";
 
 interface CommentProps {
   comments: CommentWith_User_RepliesLength[];
@@ -111,6 +112,8 @@ const CommentSummary = ({
   const { data: replies, fetchStatus: repliesFetchStatus } = useGetReplies(
     comment.id
   );
+
+  const searchParams = useSearchParams();
   const router = useRouter();
 
   const queryClient = useQueryClient();
@@ -130,9 +133,10 @@ const CommentSummary = ({
       });
   };
 
+  const checkValidDepth = () => depth + 1 <= getMostDepth();
+
   const toggleReplies = () => {
-    const mostDepth = getMostDepth();
-    if (depth + 1 > mostDepth) {
+    if (!checkValidDepth()) {
       router.push(`/feedbacks/${comment.feedbackId}/comments/${comment.id}`);
       return;
     }
@@ -140,7 +144,7 @@ const CommentSummary = ({
     setAreRepliesExpanded(!areRepliesExpanded);
   };
 
-  const handleReply = () => {
+  const handleReplySubmit = () => {
     setAreRepliesExpanded(true);
     setIsReplying(false);
   };
@@ -154,6 +158,13 @@ const CommentSummary = ({
   };
 
   const handleReplyClick = () => {
+    if (!checkValidDepth()) {
+      router.push(
+        `/feedbacks/${comment.feedbackId}/comments/${comment.id}?replyingTo=${comment.id}`
+      );
+      return;
+    }
+
     if (session?.user) setIsReplying(true);
     else openPanel(PANELS.AUTH_PANEL);
   };
@@ -161,6 +172,22 @@ const CommentSummary = ({
   useEffect(() => {
     if (autoSeeReplies) toggleReplies();
   }, [autoSeeReplies]);
+
+  useEffect(() => {
+    const replyingTo = searchParams.get("replyingTo");
+    if (replyingTo == comment.id) setIsReplying(true);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const handleResize = (e: UIEvent) => {
+      if (!checkValidDepth()) {
+        setAreRepliesExpanded(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div
@@ -199,7 +226,7 @@ const CommentSummary = ({
         <div className="flex flex-col w-full">
           {isReplying || isCreatingReply() ? (
             <CommentReply
-              onReply={handleReply}
+              onReply={handleReplySubmit}
               closeReply={() => setIsReplying(false)}
               feedbackId={comment.feedbackId}
               parentId={comment.id}
@@ -211,6 +238,7 @@ const CommentSummary = ({
             areRepliesExpanded={areRepliesExpanded}
             commentId={comment.id}
             isCreatingReply={isCreatingReply()}
+            isReplying={isReplying}
           ></CommentSummaryReplies>
         </div>
       </div>
@@ -223,6 +251,7 @@ interface CommentSummaryRepliesProps {
   commentId: string;
   areRepliesExpanded: boolean;
   isCreatingReply: boolean;
+  isReplying: boolean;
   depth: number;
 }
 
@@ -235,14 +264,13 @@ const CommentSummaryReplies = ({
   const { data: replies, fetchStatus: repliesFetchStatus } =
     useGetReplies(commentId);
 
-  return repliesFetchStatus == "fetching" ? (
+  return repliesFetchStatus == "fetching" && !replies?.length ? (
     <RepliesLoading count={1}></RepliesLoading>
   ) : areRepliesExpanded ? (
     <div className="flex flex-col">
-      {isCreatingReply && replies?.length ? (
-        <div className="mb-2">
-          <CommentSummaryLoading></CommentSummaryLoading>
-        </div>
+      {(isCreatingReply && replies?.length) ||
+      repliesFetchStatus == "fetching" ? (
+        <CommentSummaryLoading></CommentSummaryLoading>
       ) : null}
       {replies?.map((reply, index) => (
         <CommentSummary
@@ -380,12 +408,6 @@ const CommentLeftBorder = ({
 const ImageLeftBorder = () => {
   return (
     <div className="absolute left-0 -translate-x-full -translate-y-full top-1/2  lg:w-[44px] md:w-[36px] sm:w-[28px] h-[30px] rounded-bl-3xl  border-[#8C92B3]/25 border-solid border-[1px] border-t-0 border-r-0"></div>
-  );
-};
-
-const ReplyLeftBorder = () => {
-  return (
-    <div className="absolute lg:left-[-44px] md:left-[-36px] sm:left-[-28px] top-[-2px] bottom-[0px] w-[1px] bg-[#8C92B3]/25"></div>
   );
 };
 
@@ -530,7 +552,7 @@ const CommentReply = ({
         placeholder="Add a reply"
       ></ExpandableTextField>
       {leftBorder ? (
-        <div className="absolute left-[-52px] top-[-2px] bottom-0 w-[1px] bg-[#8C92B3]/25"></div>
+        <div className="absolute lg:left-[-44px] md:left-[-36px] sm:left-[-28px] top-[-2px] bottom-0 w-[1px] bg-[#8C92B3]/25"></div>
       ) : null}
     </div>
   );

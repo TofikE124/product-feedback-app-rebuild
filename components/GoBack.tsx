@@ -1,10 +1,9 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { twMerge } from "tailwind-merge";
 import Icon from "./Icon";
 import LeftArrowIcon from "/public/shared/icon-caret-left.svg";
-import { twMerge } from "tailwind-merge";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 interface Props {
   className?: string;

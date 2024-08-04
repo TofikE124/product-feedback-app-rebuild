@@ -3,7 +3,9 @@ import { useGetComments } from "@/hooks/useGetComments";
 import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
 import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
 
+import FeedbackSummaryLoading from "@/components/FeedbackSummaryLoading";
 import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 import AddComment from "./components/AddComment";
 import AddCommentGuest from "./components/AddCommentGuest";
 import AddCommentLoading from "./components/AddCommentLoading";
@@ -11,7 +13,6 @@ import Comments from "./components/Comments";
 import CommentsFeedbackSummary from "./components/CommentsFeedbackSummary";
 import CommentsLoading from "./components/CommentsLoading";
 import Header from "./components/Header";
-import FeedbackSummaryLoading from "@/components/FeedbackSummaryLoading";
 
 interface Props {
   params: { id: string };

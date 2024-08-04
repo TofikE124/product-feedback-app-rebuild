@@ -1,4 +1,5 @@
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import ReplyLeftBorder from "./ReplyLeftBorder";
 
 const CommentSummaryLoading = () => {
   return (
@@ -59,6 +60,7 @@ const CommentSummaryLoading = () => {
           ></LoadingSkeleton>
         </div>
       </div>
+      <ReplyLeftBorder></ReplyLeftBorder>
     </div>
   );
 };

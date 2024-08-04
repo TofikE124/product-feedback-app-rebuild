@@ -1,28 +1,25 @@
 "use client";
-import { useGetComments } from "@/hooks/useGetComments";
+import FeedbackSummaryLoading from "@/components/FeedbackSummaryLoading";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { useGetCommentId } from "@/hooks/useGetCommentId";
 import { useGetFeedbackId } from "@/hooks/useGetFeedbackId";
 import { useGetUserUpvotes } from "@/hooks/useGetUserUpvotes";
-import { useSession } from "next-auth/react";
-import React from "react";
-import AddComment from "../components/AddComment";
-import AddCommentGuest from "../components/AddCommentGuest";
-import AddCommentLoading from "../components/AddCommentLoading";
+import { useRouter } from "next/navigation";
 import Comments from "../components/Comments";
 import CommentsFeedbackSummary from "../components/CommentsFeedbackSummary";
 import CommentsLoading from "../components/CommentsLoading";
 import Header from "../components/Header";
-import page from "../page";
-import { useGetCommentId } from "@/hooks/useGetCommentId";
-import FeedbackSummaryLoading from "@/components/FeedbackSummaryLoading";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import LoadingSkeleton from "@/components/LoadingSkeleton";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Props {
   params: { id: string; commentId: string };
+  searchParams: { replyingTo: string };
 }
 
-const Page = ({ params: { id, commentId } }: Props) => {
+const Page = ({
+  params: { id, commentId },
+  searchParams: { replyingTo },
+}: Props) => {
   const { data: feedback, isLoading: isFeedbackLoading } = useGetFeedbackId(id);
   const { data: upvotes } = useGetUserUpvotes();
   const { data: comment, isLoading: isCommentsLoading } = useGetCommentId(
@@ -52,14 +49,15 @@ const Page = ({ params: { id, commentId } }: Props) => {
               showCommentsNumber={false}
               count={1}
             ></CommentsLoading>
-          ) : (
+          ) : null}
+          {comment ? (
             <Comments
               comments={[comment!]}
               feedbackId={id}
               showCommentsNumber={false}
-              autoSeeReplies
+              autoSeeReplies={!replyingTo}
             ></Comments>
-          )}
+          ) : null}
         </div>
       </div>
     </main>
