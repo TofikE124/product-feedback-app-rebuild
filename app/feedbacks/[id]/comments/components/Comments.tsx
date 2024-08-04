@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import CommentSummaryLoading from "./CommentsSummaryLoading";
@@ -34,12 +34,14 @@ interface CommentProps {
   comments: CommentWith_User_RepliesLength[];
   feedbackId: string;
   showCommentsNumber?: boolean;
+  autoSeeReplies?: boolean;
 }
 
 const Comments = ({
   comments,
   feedbackId,
   showCommentsNumber,
+  autoSeeReplies,
 }: CommentProps) => {
   const { data: feedback } = useGetFeedbackId(feedbackId);
 
@@ -59,6 +61,7 @@ const Comments = ({
       <div className="flex flex-col">
         {comments.map((comment) => (
           <CommentSummary
+            autoSeeReplies={autoSeeReplies}
             comment={comment}
             key={comment.id}
             depth={0}
@@ -90,6 +93,7 @@ interface CommentSummaryProps {
   isReply?: boolean;
   isLast?: boolean;
   depth: number;
+  autoSeeReplies?: boolean;
 }
 
 const CommentSummary = ({
@@ -98,6 +102,7 @@ const CommentSummary = ({
   isReply,
   isLast,
   depth,
+  autoSeeReplies,
 }: CommentSummaryProps) => {
   const { openPanel } = usePanel();
   const { data: session } = useSession();
@@ -111,6 +116,8 @@ const CommentSummary = ({
   const queryClient = useQueryClient();
 
   const getMostDepth = () => {
+    if (window.innerWidth < 400) return 2;
+
     const boxWidth = window.innerWidth - 100;
     const commentWidth = 150;
     return Math.floor(boxWidth / commentWidth) - 1;
@@ -151,9 +158,13 @@ const CommentSummary = ({
     else openPanel(PANELS.AUTH_PANEL);
   };
 
+  useEffect(() => {
+    if (autoSeeReplies) toggleReplies();
+  }, [autoSeeReplies]);
+
   return (
     <div
-      className="relative flex gap-8 py-2 w-full items-start"
+      className="relative flex sm:gap-2 md:gap-4 lg:gap-6 py-2 w-full items-start"
       data-comment-id={comment.id}
       data-index={index}
     >
@@ -268,7 +279,7 @@ const CommentSummaryHeader = ({
 }: CommentSummaryHeaderProps) => {
   return (
     <div className="flex items-end justify-between mb-4">
-      <div className="flex gap-2">
+      <div className="flex gap-2 sm:flex-col">
         <h4 className="h4 text-navy-blue">{userName}</h4>
         <h4 className="h4 text-steel-blue fpont-normal">
           {moment(createdAt).fromNow()}
@@ -333,7 +344,7 @@ const CommentLeftBorder = ({
   const showMoreReplies = firstTime && !isReplying;
 
   return (
-    <div className="absolute left-[-52px] top-[44px] bottom-[17.5px] w-[1px] bg-[#8C92B3]/25">
+    <div className="absolute lg:left-[-44px] md:left-[-36px] sm:left-[-28px] top-[44px] bottom-[17.5px] w-[1px] bg-[#8C92B3]/25">
       <div className="relative size-full">
         <div
           className={`group absolute top-[100%] left-0 -translate-x-1/2 p-2 -mt-2 rounded-full cursor-pointer ${
@@ -368,13 +379,13 @@ const CommentLeftBorder = ({
 
 const ImageLeftBorder = () => {
   return (
-    <div className="absolute left-0 -translate-x-full -translate-y-full top-1/2 w-[52px] h-[30px] rounded-bl-3xl  border-[#8C92B3]/25 border-solid border-[1px] border-t-0 border-r-0"></div>
+    <div className="absolute left-0 -translate-x-full -translate-y-full top-1/2  lg:w-[44px] md:w-[36px] sm:w-[28px] h-[30px] rounded-bl-3xl  border-[#8C92B3]/25 border-solid border-[1px] border-t-0 border-r-0"></div>
   );
 };
 
 const ReplyLeftBorder = () => {
   return (
-    <div className="absolute left-[-52px] top-[-2px] bottom-[0px] w-[1px] bg-[#8C92B3]/25"></div>
+    <div className="absolute lg:left-[-44px] md:left-[-36px] sm:left-[-28px] top-[-2px] bottom-[0px] w-[1px] bg-[#8C92B3]/25"></div>
   );
 };
 
@@ -385,14 +396,14 @@ interface CommentFooterProps {
 
 const CommentFooter = ({ onReplyClick, commentId }: CommentFooterProps) => {
   return (
-    <div className="flex pb-2">
+    <div className="flex pb-2 sm:flex-col">
       <CommentVote commentId={commentId}></CommentVote>
       <button
         onClick={onReplyClick}
-        className="flex gap-2 items-center hover:bg-steel-blue/10 rounded-full px-4 py-2"
+        className="flex gap-2 items-center hover:bg-steel-blue/10 rounded-full lgmd:px-4 py-2"
       >
         <Image src={CommentIcon} alt="Comments Icon"></Image>
-        <h4 className="body3 text-navy-blue">Reply</h4>
+        <div className="body3 text-navy-blue">Reply</div>
       </button>
     </div>
   );

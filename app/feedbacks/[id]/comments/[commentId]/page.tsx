@@ -57,6 +57,7 @@ const Page = ({ params: { id, commentId } }: Props) => {
               comments={[comment!]}
               feedbackId={id}
               showCommentsNumber={false}
+              autoSeeReplies
             ></Comments>
           )}
         </div>
