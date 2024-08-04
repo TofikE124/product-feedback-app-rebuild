@@ -17,6 +17,7 @@ import EyeClosedIcon from "/public/shared/icon-eye-closed.svg";
 import UserIcon from "/public/shared/icon-user.svg";
 
 import { useState } from "react";
+import PasswordEye from "@/components/PasswordEye";
 
 type SignupSchemaType = z.infer<typeof signUpSchema>;
 
@@ -33,6 +34,7 @@ const SignUpForm = ({
 }: SignUpFormProps) => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassowrd] = useState(false);
 
   const {
     register,
@@ -105,7 +107,7 @@ const SignUpForm = ({
         </div>
         <div className="flex flex-col gap-1">
           <p className="body3  text-steel-blue">Create Password</p>
-          <div className="w-full flex items-center gap-2">
+          <div className="relative w-full flex items-center gap-2">
             <TextField
               {...register("password")}
               placeholder="Enter your password"
@@ -113,59 +115,27 @@ const SignUpForm = ({
               errorMessage={errors.password?.message}
               icon={PasswordIcon}
             ></TextField>
-            <button
-              type="button"
+            <PasswordEye
+              showPassword={showPassword}
               onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <Icon
-                  icon={EyeOpenedIcon}
-                  color="#3a4374"
-                  width={24}
-                  height={24}
-                ></Icon>
-              ) : (
-                <Icon
-                  icon={EyeClosedIcon}
-                  color="#3a4374"
-                  width={24}
-                  height={24}
-                ></Icon>
-              )}
-            </button>
+            ></PasswordEye>
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
           <p className="body3  text-steel-blue">Confirm Password</p>
-          <div className="w-full flex items-center gap-2">
+          <div className="relative w-full flex items-center gap-2">
             <TextField
               {...register("repeatedPassword")}
               placeholder="Enter your password"
-              type={showPassword ? "text" : "password"}
+              type={showRepeatPassword ? "text" : "password"}
               errorMessage={errors.repeatedPassword?.message}
               icon={PasswordIcon}
             ></TextField>
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <Icon
-                  icon={EyeOpenedIcon}
-                  color="#3a4374"
-                  width={24}
-                  height={24}
-                ></Icon>
-              ) : (
-                <Icon
-                  icon={EyeClosedIcon}
-                  color="#3a4374"
-                  width={24}
-                  height={24}
-                ></Icon>
-              )}
-            </button>
+            <PasswordEye
+              showPassword={showRepeatPassword}
+              onClick={() => setShowRepeatPassowrd(!showRepeatPassword)}
+            ></PasswordEye>
           </div>
         </div>
         <p className="body3 font-normal text-navy-blue">

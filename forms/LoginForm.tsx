@@ -11,12 +11,10 @@ import toast from "react-hot-toast";
 import { z } from "zod";
 import { twMerge } from "tailwind-merge";
 
-import Icon from "@/components/Icon";
 import EmailIcon from "/public/shared/icon-email.svg";
 import GoogleIcon from "/public/shared/icon-google.png";
 import PasswordIcon from "/public/shared/icon-password.svg";
-import EyeOpenedIcon from "/public/shared/icon-eye-opened.svg";
-import EyeClosedIcon from "/public/shared/icon-eye-closed.svg";
+import PasswordEye from "@/components/PasswordEye";
 
 type LoginSchemaType = z.infer<typeof loginSchema>;
 
@@ -108,7 +106,7 @@ const LoginForm = ({
         </div>
         <div className="flex flex-col gap-1">
           <p className="body3  text-steel-blue">Password</p>
-          <div className="w-full flex items-center gap-2">
+          <div className="relative w-full flex items-center gap-2">
             <TextField
               {...register("password")}
               placeholder="Enter your password"
@@ -116,26 +114,10 @@ const LoginForm = ({
               errorMessage={errors.password?.message}
               icon={PasswordIcon}
             ></TextField>
-            <button
-              type="button"
+            <PasswordEye
+              showPassword={showPassword}
               onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <Icon
-                  icon={EyeOpenedIcon}
-                  color="#3a4374"
-                  width={24}
-                  height={24}
-                ></Icon>
-              ) : (
-                <Icon
-                  icon={EyeClosedIcon}
-                  color="#3a4374"
-                  width={24}
-                  height={24}
-                ></Icon>
-              )}
-            </button>
+            ></PasswordEye>
           </div>
         </div>
         <Button color="navy-blue">Login</Button>
