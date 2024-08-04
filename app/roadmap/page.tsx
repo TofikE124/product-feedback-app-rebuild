@@ -11,7 +11,7 @@ import { FeedbackWith_UpVotes_Comments } from "@/types/Feedback";
 import { Status } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import CommentsIcon from "/public/shared/icon-comments.svg";
 import OvalLoadingSpinner from "@/components/OvalLoadingSpinner";
 
@@ -43,6 +43,19 @@ const Header = () => {
 const RoadMapMain = () => {
   const statuses = Object.values(Status);
   const [activeIndex, setActiveIndex] = useState(0);
+  const { fetchStatus } = useLoadFeedbacks();
+
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current || !document) return;
+
+    const statusHeight = document.querySelector(
+      `div[data-status-item][data-index="${activeIndex}"]`
+    )?.clientHeight;
+
+    ref.current.style.height = `${statusHeight || 0}px`;
+  }, [activeIndex, fetchStatus]);
 
   return (
     <div className="relative lgmd:mt-12 md:mt-8 overflow-hidden">
@@ -52,12 +65,17 @@ const RoadMapMain = () => {
         onItemClick={(index) => setActiveIndex(index)}
       ></MobileStatusNavigation>
       <div
-        className="grid grid-cols-3 lg:gap-8 md:gap-[10px] sm:w-[300vw] sm:transition-[transform] sm:duration-300 lgmd:!translate-x-0"
+        className="relative grid grid-cols-3 lg:gap-8 md:gap-[10px] sm:w-[300vw] sm:transition-[transform,height] sm:duration-300 lgmd:!translate-x-0"
         style={{ transform: `translate(${-100 * activeIndex}vw, 0)` }}
+        ref={ref}
       >
         {statuses.map((status, index) => (
           <Suspense key={index}>
-            <StatusItem status={status}></StatusItem>
+            <StatusItem
+              status={status}
+              isActive={index == activeIndex}
+              index={index}
+            ></StatusItem>
           </Suspense>
         ))}
       </div>
@@ -126,17 +144,22 @@ const MobileStatusNavigationItem = ({
 
 interface StatusItemProps {
   status: Status;
+  isActive: boolean;
+  index: number;
 }
 
-const StatusItem = ({ status }: StatusItemProps) => {
-  const { data: feedbacks } = useLoadFeedbacks();
-  const { fetchStatus } = useLoadFeedbacks();
+const StatusItem = ({ status, isActive, index }: StatusItemProps) => {
+  const { data: feedbacks, fetchStatus } = useLoadFeedbacks();
   const { color, description, label } = roadMapItemMap[status];
 
   const filteredFeedbacks = getFeedbacksByStatus(feedbacks || [], status);
 
   return (
-    <div className="flex flex-col gap-8 sm:px-6 sm:w-screen">
+    <div
+      className="flex flex-col gap-8 sm:px-6 sm:w-screen h-fit"
+      data-status-item
+      data-index={index}
+    >
       <div>
         <h3 className="h3 text-navy-blue flex items-center gap-2">
           {label}{" "}
