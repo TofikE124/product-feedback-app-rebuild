@@ -252,7 +252,11 @@ const RoadmapFeedbackSummary = ({
         ></FeedbackType>
       </div>
       <div className="flex items-center justify-between w-full">
-        <UpVoteButton feedbackId={feedback.id} horizontal></UpVoteButton>
+        <UpVoteButton
+          feedbackId={feedback.id}
+          defaultUpvotes={feedback.upVotes.length}
+          horizontal
+        ></UpVoteButton>
         <div className="flex items-center gap-2">
           <Image src={CommentsIcon} alt="Comments Icon" />
           <p className="body1 text-navy-blue font-bold">

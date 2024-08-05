@@ -13,9 +13,14 @@ import { PANELS } from "@/constants/panels";
 interface UpVoteProps {
   feedbackId: string;
   horizontal?: boolean;
+  defaultUpvotes?: number;
 }
 
-const UpVoteButton = ({ feedbackId, horizontal }: UpVoteProps) => {
+const UpVoteButton = ({
+  feedbackId,
+  horizontal,
+  defaultUpvotes,
+}: UpVoteProps) => {
   const { data: feedback } = useGetFeedbackId(feedbackId);
   const { data: myUpVotes } = useGetUserUpvotes();
   const { mutate: handleUpVote, isPending: isUpVoting } = useUpvote(feedbackId);
@@ -59,7 +64,7 @@ const UpVoteButton = ({ feedbackId, horizontal }: UpVoteProps) => {
           isUpvoted() ? "text-white" : "text-navy-blue"
         }`}
       >
-        {feedback?.upVotes.length}
+        {feedback?.upVotes.length ?? defaultUpvotes}
       </p>
     </div>
   );

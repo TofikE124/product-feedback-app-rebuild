@@ -47,7 +47,10 @@ const FeedbackSummary = memo(
       >
         <div className="relative grid z-[2] lgmd:grid-cols-[max-content,1fr,max-content] lgmd:gap-10 sm:grid-cols-[1fr,max-content] sm:gap-y-4">
           <div className="lgmd:col-start-1 sm:row-start-2">
-            <UpVoteButton feedbackId={feedback.id}></UpVoteButton>
+            <UpVoteButton
+              defaultUpvotes={feedback.upVotes.length}
+              feedbackId={feedback.id}
+            ></UpVoteButton>
           </div>
           <div className="lgmd:col-start-2 flex flex-col">
             <h3 className="h3 text-navy-blue lgmd:mb-1 sm:mb-2">
