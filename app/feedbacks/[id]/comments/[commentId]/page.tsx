@@ -56,6 +56,7 @@ const Page = ({
               feedbackId={id}
               showCommentsNumber={false}
               autoSeeReplies={!replyingTo}
+              areCommentsFetching={false}
             ></Comments>
           ) : null}
         </div>
