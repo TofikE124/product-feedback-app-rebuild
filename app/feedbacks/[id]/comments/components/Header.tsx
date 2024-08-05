@@ -3,6 +3,7 @@ import GoBack from "@/components/GoBack";
 import Logo from "@/components/Logo";
 import { useIsOwnFeedback } from "@/hooks/useIsOwnFeedback";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   feedbackId?: string;
@@ -34,10 +35,18 @@ interface EditFeedbackProps {
 
 const EditFeedback = ({ feedbackId }: EditFeedbackProps) => {
   const { data: isOwn, fetchStatus } = useIsOwnFeedback(feedbackId);
+  const router = useRouter();
+
   return isOwn ? (
-    <Link href={`/feedbacks/${feedbackId}/edit`}>
-      <Button color="dark-sky-blue">Edit Feedback</Button>
-    </Link>
+    <Button
+      onClick={() => {
+        router.push(`/feedbacks/${feedbackId}/edit`);
+        router.refresh();
+      }}
+      color="dark-sky-blue"
+    >
+      Edit Feedback
+    </Button>
   ) : null;
 };
 

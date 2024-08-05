@@ -31,12 +31,14 @@ import MinusCircleIcon from "/public/shared/icon-minus-circle.svg";
 import PlusCircleIcon from "/public/shared/icon-plus-circle.svg";
 import ReplyLeftBorder from "./ReplyLeftBorder";
 import ImageLeftBorder from "./ImageLeftBorder";
+import { useGetComments } from "@/hooks/useGetComments";
 
 interface CommentProps {
   comments: CommentWith_User_RepliesLength[];
   feedbackId: string;
   showCommentsNumber?: boolean;
   autoSeeReplies?: boolean;
+  areCommentsFetching: boolean;
 }
 
 const Comments = ({
@@ -44,6 +46,7 @@ const Comments = ({
   feedbackId,
   showCommentsNumber,
   autoSeeReplies,
+  areCommentsFetching,
 }: CommentProps) => {
   const { data: feedback } = useGetFeedbackId(feedbackId);
 
@@ -61,6 +64,10 @@ const Comments = ({
       ) : null}
 
       <div className="flex flex-col">
+        {/* when submitting a comment show loading */}
+        {areCommentsFetching ? (
+          <CommentSummaryLoading></CommentSummaryLoading>
+        ) : null}
         {comments.map((comment) => (
           <CommentSummary
             autoSeeReplies={autoSeeReplies}

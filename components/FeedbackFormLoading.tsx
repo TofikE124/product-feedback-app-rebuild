@@ -17,7 +17,7 @@ const FeedbackFormLoading = () => {
       ></LoadingSkeleton>
 
       <div className="flex flex-col gap-6 mt-10 ">
-        <div>
+        <div className="space-y-2">
           <LoadingSkeleton
             width={150}
             height={20}
@@ -29,7 +29,7 @@ const FeedbackFormLoading = () => {
             containerClassName="h-[48px]"
           ></LoadingSkeleton>
         </div>
-        <div>
+        <div className="space-y-2">
           <LoadingSkeleton
             width={150}
             height={20}
@@ -41,7 +41,7 @@ const FeedbackFormLoading = () => {
             containerClassName="h-[48px]"
           ></LoadingSkeleton>
         </div>
-        <div>
+        <div className="space-y-2">
           <LoadingSkeleton
             width={150}
             height={20}
@@ -53,7 +53,7 @@ const FeedbackFormLoading = () => {
             containerClassName="h-[48px]"
           ></LoadingSkeleton>
         </div>
-        <div>
+        <div className="space-y-2">
           <LoadingSkeleton
             width={150}
             height={20}
@@ -62,14 +62,14 @@ const FeedbackFormLoading = () => {
           <LoadingSkeleton
             width={450}
             height={100}
-            containerClassName="h-[48px]"
+            containerClassName="h-[100px]"
           ></LoadingSkeleton>
         </div>
         <div className="flex w-full justify-end gap-4">
           <LoadingSkeleton
             width={100}
             height={44}
-            containerClassName="h-[20px]"
+            containerClassName="h-[44px]"
           ></LoadingSkeleton>
           <LoadingSkeleton
             width={150}

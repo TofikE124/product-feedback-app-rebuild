@@ -13,6 +13,7 @@ import Comments from "./components/Comments";
 import CommentsFeedbackSummary from "./components/CommentsFeedbackSummary";
 import CommentsLoading from "./components/CommentsLoading";
 import Header from "./components/Header";
+import CommentSummaryLoading from "./components/CommentsSummaryLoading";
 
 interface Props {
   params: { id: string };
@@ -22,7 +23,11 @@ const Page = ({ params: { id } }: Props) => {
   const { data: session } = useSession();
   const { data: feedback, isLoading: isFeedbackLoading } = useGetFeedbackId(id);
   const { data: upvotes } = useGetUserUpvotes();
-  const { data: comments, isLoading: isCommentsLoading } = useGetComments(id);
+  const {
+    data: comments,
+    fetchStatus: commentsFetchStatus,
+    isLoading: commentsLoading,
+  } = useGetComments(id);
 
   return (
     <main className="lg:max-w-[1200px] lgmd:px-10 mx-auto min-h-screen flex mdsm:flex-col lgmd:gap-8 lg:py-[50px] md:pt-[40px] md:pb-[40px] sm:py-[25px] sm:px-4">
@@ -48,10 +53,15 @@ const Page = ({ params: { id } }: Props) => {
           ) : (
             <AddCommentLoading></AddCommentLoading>
           )}
-          {isCommentsLoading ? (
+
+          {commentsLoading ? (
             <CommentsLoading></CommentsLoading>
           ) : (
-            <Comments comments={comments || []} feedbackId={id}></Comments>
+            <Comments
+              comments={comments || []}
+              feedbackId={id}
+              areCommentsFetching={commentsFetchStatus == "fetching"}
+            ></Comments>
           )}
         </div>
       </div>

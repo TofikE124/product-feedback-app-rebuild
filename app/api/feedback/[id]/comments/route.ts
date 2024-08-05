@@ -13,6 +13,7 @@ export async function GET(request: NextRequest, { params: { id } }: Props) {
       user: true,
       replies: { select: { _count: true } },
     },
+    orderBy: { updatedAt: "desc" },
   });
 
   return NextResponse.json(comments, { status: 200 });
